@@ -1,19 +1,27 @@
-const UpcomingEvents = ({ events = [] }) => {
-  return (
-    <div className="bg-white p-4 rounded-xl shadow">
-      <h3 className="font-bold text-lg mb-3">📌 Upcoming CA / Events</h3>
-      {events.length === 0 ? (
-        <p className="text-gray-500 text-sm">No upcoming events</p>
-      ) : (
-        events.map((event, idx) => (
-          <div key={idx} className="border-b py-2 last:border-0">
-            <p className="font-medium">{event.title}</p>
-            <p className="text-sm text-gray-500">{event.date}</p>
-          </div>
-        ))
-      )}
-    </div>
-  )
-}
+// "Later this week" panel: the next lectures after today, with their day.
+import React from 'react';
+import { ArrowUpRight, MapPin } from 'lucide-react';
+import { days, fmt } from '../../utils/formatDate';
 
-export default UpcomingEvents
+export default function UpcomingEvents({ classes, onViewTimetable }) {
+  const later = classes.filter((c) => c.day > 0).slice(0, 3);
+  return (
+    <section className="panel mini-panel">
+      <div className="panel-head">
+        <div><h3>Later this week</h3><p>Lectures coming up after today</p></div>
+        <button className="text-action" onClick={onViewTimetable}>View timetable <ArrowUpRight size={14} /></button>
+      </div>
+      <div className="upcoming-list">
+        {later.length === 0 && <p>No more lectures scheduled this week.</p>}
+        {later.map((c) => (
+          <div className="upcoming-row" key={c.id}>
+            <div className="upcoming-time"><b>{days[c.day].slice(0, 3)}</b><small>{fmt(c.start)}</small></div>
+            <div className={`class-color ${c.color}`}></div>
+            <div className="upcoming-info"><b>{c.title}</b><span>{c.code} <i>•</i> {c.lecturer}</span></div>
+            <div className="upcoming-room"><MapPin size={13} />{c.room}</div>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}

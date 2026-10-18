@@ -1,38 +1,34 @@
-import { createContext, useContext, useState } from 'react'
+// Authentication context: holds the signed-in user and exposes login / signup / logout.
+import React, { createContext, useContext, useState } from 'react';
+import { authenticate, registerAccount, getSessionUser, saveSession, clearSession } from '../services/authService';
 
-const AuthContext = createContext()
+const AuthContext = createContext(null);
 
-const DEMO_EMAIL = 'admin@gmail.com'
-const DEMO_PASSWORD = 'Admin@123'
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(() => getSessionUser());
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(() => {
-    const saved = localStorage.getItem('user')
-    return saved ? JSON.parse(saved) : null
-  })
+  // Throws an Error (with a friendly message) when the credentials are wrong.
+  const login = (email, password, role) => {
+    const signedIn = authenticate(email, password, role);
+    saveSession(signedIn);
+    setUser(signedIn);
+    return signedIn;
+  };
 
-  const login = async (email, password) => {
-    if (email.trim().toLowerCase() !== DEMO_EMAIL || password !== DEMO_PASSWORD) {
-      throw new Error('Invalid email or password')
-    }
-    const demoUser = { name: 'Admin', email: DEMO_EMAIL }
-    localStorage.setItem('user', JSON.stringify(demoUser))
-    localStorage.setItem('token', 'local-demo-token')
-    setUser(demoUser)
-    return { user: demoUser, token: 'local-demo-token' }
-  }
+  // Create an account; the caller then asks the user to sign in.
+  const signup = (details) => registerAccount(details);
 
-  const logout = () => {
-    localStorage.removeItem('token')
-    localStorage.removeItem('user')
-    setUser(null)
-  }
+  const logout = () => { clearSession(); setUser(null); };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ user, isAuthenticated: !!user, login, signup, logout }}>
       {children}
     </AuthContext.Provider>
-  )
+  );
 }
 
-export const useAuth = () => useContext(AuthContext)
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) throw new Error('useAuth must be used inside <AuthProvider>');
+  return ctx;
+};

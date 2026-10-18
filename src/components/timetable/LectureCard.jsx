@@ -1,26 +1,24 @@
-const LectureCard = ({ lecture }) => {
-  const statusColor = {
-    Cancelled: 'bg-red-200 text-red-800',
-    Rescheduled: 'bg-yellow-200 text-yellow-800',
-    Scheduled: 'bg-green-200 text-green-800',
-  }
+// One lecture block inside the weekly calendar. Click to reveal the Remove action.
+import React from 'react';
+import { Clock3, MapPin, X } from 'lucide-react';
+import { fmt } from '../../utils/formatDate';
 
+export default function LectureCard({ lecture: c, selected, onSelect, onRemove }) {
   return (
-    <div className="border p-3 rounded-lg shadow-sm bg-white">
-      <h4 className="font-semibold text-blue-700">{lecture.subjectName}</h4>
-      <p className="text-sm text-gray-600">
-        {lecture.startTime} - {lecture.endTime}
-      </p>
-      <p className="text-sm text-gray-600">Hall: {lecture.hallNo}</p>
-      <span
-        className={`inline-block mt-2 px-2 py-1 rounded-full text-xs ${
-          statusColor[lecture.status] || 'bg-gray-200'
-        }`}
-      >
-        {lecture.status || 'Scheduled'}
-      </span>
-    </div>
-  )
+    <button
+      className={`calendar-event ${c.color}`}
+      style={{ height: `${Math.max(52, (c.end - c.start) * 53 - 5)}px` }}
+      onClick={() => onSelect(selected ? null : c.id)}
+    >
+      <b>{c.code}</b>
+      <span>{c.title}</span>
+      <small><Clock3 size={11} />{fmt(c.start)} – {fmt(c.end)}</small>
+      <small><MapPin size={11} />{c.room}</small>
+      {selected && (
+        <span className="event-actions" onClick={(e) => e.stopPropagation()}>
+          <button onClick={() => onRemove(c.id)}><X size={12} /> Remove</button>
+        </span>
+      )}
+    </button>
+  );
 }
-
-export default LectureCard

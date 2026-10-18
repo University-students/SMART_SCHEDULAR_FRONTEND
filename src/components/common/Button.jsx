@@ -1,15 +1,12 @@
-const Button = ({ children, variant = 'primary', ...props }) => {
-  const base = 'px-4 py-2 rounded-lg font-medium transition'
-  const variants = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700',
-    secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300',
-    danger: 'bg-red-600 text-white hover:bg-red-700',
-  }
+// Reusable button. variant: primary | secondary | light | glass. Pass an icon component via `icon`.
+import React from 'react';
+
+export default function Button({ variant = 'primary', icon: Icon, full = false, className = '', children, ...props }) {
+  const classes = ['btn', `btn-${variant}`, full ? 'full-btn' : '', className].filter(Boolean).join(' ');
   return (
-    <button className={`${base} ${variants[variant]}`} {...props}>
+    <button type="button" className={classes} {...props}>
+      {Icon && <Icon size={16} />}
       {children}
     </button>
-  )
+  );
 }
-
-export default Button

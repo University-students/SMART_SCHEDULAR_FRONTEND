@@ -1,43 +1,28 @@
-import { useState } from 'react'
-import { useNotifications } from '../../context/NotificationContext'
+// Bell icon with an unread dot and a dropdown list of notifications.
+import React, { useState } from 'react';
+import { Bell } from 'lucide-react';
+import { useNotifications } from '../../context/NotificationContext';
 
-const NotificationBadge = () => {
-  const { notifications, markAllRead } = useNotifications()
-  const [open, setOpen] = useState(false)
-  const unread = notifications.filter((n) => !n.read).length
+export default function NotificationBadge() {
+  const { notices, unreadCount, markAllRead } = useNotifications();
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className="relative">
-      <button
-        onClick={() => {
-          setOpen(!open)
-          if (!open) markAllRead()
-        }}
-        className="relative p-1"
-      >
-        🔔
-        {unread > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-            {unread}
-          </span>
-        )}
+    <div className="notification-wrap">
+      <button className="icon-btn notification-btn" onClick={() => setOpen(!open)} aria-label="Notifications">
+        <Bell size={19} />{unreadCount > 0 && <i />}
       </button>
       {open && (
-        <div className="absolute right-0 mt-2 w-72 bg-white text-gray-800 rounded-lg shadow-lg border z-50">
-          <div className="p-3 border-b font-semibold">Notifications</div>
-          {notifications.length === 0 ? (
-            <p className="p-3 text-sm text-gray-500">No notifications</p>
-          ) : (
-            notifications.map((n) => (
-              <div key={n.id} className="p-3 border-b text-sm">
-                {n.message}
-              </div>
-            ))
-          )}
+        <div className="notification-pop">
+          <div className="pop-head"><b>Notifications</b><button onClick={markAllRead}>Mark all read</button></div>
+          {notices.map((n) => (
+            <div className={`notice ${n.unread ? 'unread' : ''}`} key={n.id}>
+              <span className="notice-dot"></span>
+              <div><b>{n.title}</b><p>{n.text}</p><small>{n.time}</small></div>
+            </div>
+          ))}
         </div>
       )}
     </div>
-  )
+  );
 }
-
-export default NotificationBadge

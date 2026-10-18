@@ -1,27 +1,20 @@
-import { Link } from 'react-router-dom'
-import NotificationBadge from './NotificationBadge'
-import { useAuth } from '../../context/AuthContext'
+// Top bar: mobile menu button, breadcrumb, semester chip, notifications and avatar.
+import React from 'react';
+import { ChevronDown, Menu } from 'lucide-react';
+import NotificationBadge from './NotificationBadge';
 
-const Navbar = () => {
-  const { user, logout } = useAuth()
-
+export default function Navbar({ page, onMenuClick, initials }) {
   return (
-    <nav className="bg-blue-700 text-white px-4 py-3 flex items-center justify-between shadow-md">
-      <Link to="/" className="text-xl font-bold">
-        🎓 Lecture Scheduler
-      </Link>
-      <div className="flex items-center gap-4">
-        <NotificationBadge />
-        <span className="hidden sm:inline">{user?.name || 'User'}</span>
-        <button
-          onClick={logout}
-          className="bg-blue-800 hover:bg-blue-900 px-3 py-1 rounded text-sm"
-        >
-          Logout
-        </button>
+    <header className="topbar">
+      <div className="topbar-left">
+        <button className="icon-btn mobile-menu" onClick={onMenuClick} aria-label="Open menu"><Menu size={20} /></button>
+        <div className="breadcrumb">Workspace <span>/</span> <b>{page}</b></div>
       </div>
-    </nav>
-  )
+      <div className="topbar-actions">
+        <div className="semester-select"><span className="semester-dot"></span><span>Semester 2, 2026</span><ChevronDown size={15} /></div>
+        <NotificationBadge />
+        <div className="top-avatar">{initials}</div>
+      </div>
+    </header>
+  );
 }
-
-export default Navbar

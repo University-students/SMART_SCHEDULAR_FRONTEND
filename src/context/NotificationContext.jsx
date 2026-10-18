@@ -1,29 +1,42 @@
-import { createContext, useContext, useState } from 'react'
+// Notification context: toast messages plus the notification list shown by the bell icon.
+import React, { createContext, useCallback, useContext, useRef, useState } from 'react';
+import { CheckCircle2, X } from 'lucide-react';
 
-const NotificationContext = createContext()
+const NotificationContext = createContext(null);
 
-export const NotificationProvider = ({ children }) => {
-  const [notifications, setNotifications] = useState([
-    { id: 1, message: 'CA 2 එකට තව දින 3ක්!', type: 'warning', read: false },
-    { id: 2, message: 'කාලසටහන වෙනස් විය: CS101', type: 'info', read: false },
-  ])
+const INITIAL_NOTICES = [
+  { id: 1, title: 'Room update', text: 'ICT 2202 moved to Lab 01.', time: '10 min ago', unread: true },
+  { id: 2, title: 'Timetable published', text: 'Week 06 timetable is ready to view.', time: '1 hour ago', unread: true },
+  { id: 3, title: 'Availability submitted', text: 'A lecturer updated availability.', time: 'Yesterday', unread: false },
+];
 
-  const addNotification = (notification) => {
-    setNotifications((prev) => [
-      { id: Date.now(), read: false, ...notification },
-      ...prev,
-    ])
-  }
+export function NotificationProvider({ children }) {
+  const [notices, setNotices] = useState(INITIAL_NOTICES);
+  const [toast, setToast] = useState('');
+  const timer = useRef(null);
 
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
-  }
+  // Show a toast for 3 seconds.
+  const notify = useCallback((message) => {
+    setToast(message);
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => setToast(''), 3000);
+  }, []);
+
+  const markAllRead = () => setNotices((list) => list.map((n) => ({ ...n, unread: false })));
+  const unreadCount = notices.filter((n) => n.unread).length;
 
   return (
-    <NotificationContext.Provider value={{ notifications, addNotification, markAllRead }}>
+    <NotificationContext.Provider value={{ notices, unreadCount, notify, markAllRead }}>
       {children}
+      {toast && (
+        <div className="toast"><CheckCircle2 size={18} />{toast}<button onClick={() => setToast('')}><X size={15} /></button></div>
+      )}
     </NotificationContext.Provider>
-  )
+  );
 }
 
-export const useNotifications = () => useContext(NotificationContext)
+export const useNotifications = () => {
+  const ctx = useContext(NotificationContext);
+  if (!ctx) throw new Error('useNotifications must be used inside <NotificationProvider>');
+  return ctx;
+};
