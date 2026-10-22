@@ -1,9 +1,8 @@
-/** @type {import('tailwindcss').Config} */
+/** Tailwind configuration retained for the requested project structure.
+ * The current interface uses the existing styles.css and does not require Tailwind.
+ */
 export default {
-  content: ['./index.html', './src/**/*.{js,jsx}'],
+  content: ['./index.html', './src/**/*.{js,jsx,ts,tsx}'],
   theme: { extend: {} },
   plugins: [],
-  // The existing UniSchedule styles in index.css already include their own reset,
-  // so Tailwind's preflight is turned off to avoid changing how current pages look.
-  corePlugins: { preflight: false },
 };

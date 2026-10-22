@@ -1,81 +1,26 @@
-// Dashboard page: welcome banner, key statistics, today's schedule, schedule health and quick actions.
+// Dashboard page: overview statistics, quick actions, and schedule health.
 import React, { useState } from 'react';
 import {
-  ArrowUpRight, BookOpen, CalendarCheck, CalendarDays, Check, CheckCircle2, ChevronDown, ChevronRight,
-  DoorOpen, MoreHorizontal, Plus, Sparkles, Users, Zap
+  MoreHorizontal, CheckCircle2, CalendarCheck, DoorOpen, Clock3, MapPin, Zap,
+  ChevronRight, ArrowUpRight, Sparkles, Plus, Users, GraduationCap,
+  CalendarDays, Search, X, SlidersHorizontal, ChevronDown, Filter,
+  Check, AlertTriangle, Download, ChevronLeft, BookOpen, UserRound, Bell
 } from 'lucide-react';
-import Button from '../components/common/Button';
-import DailySchedule from '../components/dashboard/DailySchedule';
-import AlertWidget from '../components/dashboard/AlertWidget';
-import UpcomingEvents from '../components/dashboard/UpcomingEvents';
+import { days, times, fmt } from '../data';
+import { StatCard, SearchBar, ToggleRow, ShieldIcon } from '../components/shared';
 
-// Reusable statistic card (also used by the Progress page).
-export function StatCard({ title, value, change, icon: Icon, tone, foot }) {
-  return (
-    <div className="stat-card">
-      <div className={`stat-icon ${tone}`}><Icon size={19} /></div>
-      <div className="stat-top"><span>{title}</span><button className="icon-btn tiny"><MoreHorizontal size={18} /></button></div>
-      <div className="stat-value">{value}</div>
-      <div className="stat-foot">{change && <span className={change.startsWith('+') ? 'positive' : 'neutral'}>{change}</span>}<span>{foot}</span></div>
-    </div>
-  );
+export function Dashboard({classes,people,rooms,batches,courseList,setPage,openAdd,generate,exportCSV,notify}) {
+  const [filter,setFilter]=useState('This week');
+  const today=classes.filter(c=>c.day===0).length;
+  const clashCount = classes.reduce((total, c, i) => total + classes.slice(i+1).filter(x => x.day===c.day && x.start<c.end && x.end>c.start && (x.room===c.room || x.lecturer===c.lecturer || x.batch===c.batch)).length, 0);
+  const roomUtil = rooms.length ? Math.min(100, Math.round(classes.length / Math.max(1, rooms.length * 5) * 100)) : 0;
+  const assignedCount = classes.filter(c=>c.lecturer && c.lecturer!=='Unassigned lecturer').length;
+  const health = Math.max(0, 100 - clashCount*12 - Math.max(0, classes.length-assignedCount)*3);
+  return <><div className="welcome-banner"><div className="welcome-copy"><div className="welcome-kicker"><span className="banner-spark"><Sparkles size={13}/></span> YOUR DEPARTMENT AT A GLANCE</div><h2>Plan smarter. Teach better.</h2><p>One clear view of lectures, rooms and people — so your department stays in sync.</p><div className="banner-actions"><button className="btn btn-light" onClick={()=>setPage('Timetable')}><CalendarDays size={16}/> View timetable <ArrowUpRight size={15}/></button><button className="btn btn-glass" onClick={generate}><Zap size={16}/> Generate schedule</button></div></div><div className="banner-art"><div className="art-orbit orbit-one"></div><div className="art-orbit orbit-two"></div><div className="art-calendar"><div className="art-cal-head"><span></span><span></span><span></span></div><div className="art-cal-title">THIS WEEK</div><div className="art-cal-grid">{Array.from({length:21},(_,i)=><i key={i} className={[3,5,10,12,16].includes(i)?'marked':''}></i>)}</div><div className="art-check"><Check size={17}/></div></div><div className="art-floating"><CheckCircle2 size={16}/><div><b>Conflict-free</b><small>Schedule preview</small></div></div></div><div className="banner-decoration"></div></div>
+  <div className="section-heading"><div><h2>Overview</h2><p>Key scheduling metrics for your department</p></div><button className="filter-button" onClick={()=>setFilter(filter==='This week'?'This semester':'This week')}><CalendarDays size={15}/>{filter}<ChevronDown size={14}/></button></div>
+  <div className="stats-grid"><StatCard title="Scheduled lectures" value={String(classes.length).padStart(2,'0')} change="+12.5%" foot="vs. last week" icon={CalendarCheck} tone="purple"/><StatCard title="Active courses" value={String(courseList.length).padStart(2,'0')} change="" foot="this semester" icon={BookOpen} tone="blue"/><StatCard title="Lecturers" value={String(people.length).padStart(2,'0')} change="" foot="across the department" icon={Users} tone="green"/><StatCard title="Room utilisation" value={`${roomUtil}%`} change="" foot="based on scheduled lectures" icon={DoorOpen} tone="orange"/></div>
+  <div className="dashboard-grid"><section className="panel schedule-panel"><div className="panel-head"><div><h3>Upcoming lectures</h3><p>Your next scheduled classes</p></div><button className="text-action" onClick={()=>setPage('Timetable')}>Full timetable <ArrowUpRight size={15}/></button></div><div className="upcoming-list">{classes.filter(c=>c.day===0).slice(0,4).map((c,i)=><div className="upcoming-row" key={c.id}><div className="upcoming-time"><b>{fmt(c.start)}</b><small>{fmt(c.end)}</small></div><div className={`class-color ${c.color}`}></div><div className="upcoming-info"><b>{c.title}</b><span>{c.code} <i>•</i> {c.lecturer}</span></div><div className="upcoming-room"><MapPin size={13}/>{c.room}</div><button className="icon-btn tiny" onClick={()=>notify(`${c.title} details selected`)}><MoreHorizontal size={17}/></button></div>)}</div><button className="bottom-link" onClick={()=>setPage('Timetable')}>View all lectures <ChevronRight size={16}/></button></section>
+  <section className="panel health-panel"><div className="panel-head"><div><h3>Schedule health</h3><p>Timetable quality at a glance</p></div><span className="health-badge"><span></span> {clashCount ? 'Needs review' : 'Good'}</span></div><div className="health-score"><div className="score-ring"><div><b>{health}</b><small>/100</small></div></div><div className="score-copy"><b>Looking great!</b><p>{clashCount ? 'Review overlapping lectures before publishing.' : 'No resource conflicts detected in the current schedule.'}</p></div></div><div className="health-metrics"><div><span><span className="metric-dot green-dot"></span>Conflicts detected</span><b>{clashCount}</b></div><div><span><span className="metric-dot purple-dot"></span>Lecturers assigned</span><b>{classes.length ? Math.round(assignedCount/classes.length*100) : 0}%</b></div><div><span><span className="metric-dot orange-dot"></span>Rooms in use</span><b>{roomUtil}%</b></div></div><button className="outline-wide" onClick={()=>setPage('Analytics')}>View detailed analytics <ArrowUpRight size={15}/></button></section></div>
+  <div className="dashboard-bottom"><section className="panel mini-panel"><div className="panel-head"><div><h3>Room availability</h3><p>Spaces across your department</p></div><button className="text-action" onClick={()=>setPage('Rooms')}>View rooms <ArrowUpRight size={14}/></button></div><div className="room-availability">{rooms.slice(0,3).map((r,i)=><div className="room-mini" key={r.code}><div className={`room-symbol room-${i}`}><DoorOpen size={18}/></div><div className="room-mini-info"><b>{r.code}</b><small>{r.type} · {r.capacity} seats</small></div><span className={`room-status ${r.status==='In use'?'busy':''}`}><i></i>{r.status}</span></div>)}</div></section><section className="panel mini-panel"><div className="panel-head"><div><h3>Quick actions</h3><p>Common tasks, one click away</p></div></div><div className="quick-actions"><button onClick={()=>openAdd('class')}><span className="quick-icon purple"><Plus size={17}/></span><span><b>Add a lecture</b><small>Schedule a new class</small></span><ChevronRight size={16}/></button><button onClick={generate}><span className="quick-icon blue"><Sparkles size={17}/></span><span><b>Generate timetable</b><small>Auto-build a draft schedule</small></span><ChevronRight size={16}/></button><button onClick={()=>setPage('Availability')}><span className="quick-icon green"><CalendarCheck size={17}/></span><span><b>Check availability</b><small>Review lecturer time slots</small></span><ChevronRight size={16}/></button></div></section></div></>;
 }
 
-export default function Dashboard({ classes, courses, people, stats, onNavigate, onAddLecture, onGenerate, notify }) {
-  const [filter, setFilter] = useState('This week');
-
-  return (
-    <>
-      <div className="welcome-banner">
-        <div className="welcome-copy">
-          <div className="welcome-kicker"><span className="banner-spark"><Sparkles size={13} /></span> YOUR DEPARTMENT AT A GLANCE</div>
-          <h2>Plan smarter. Teach better.</h2>
-          <p>One clear view of lectures, rooms and people — so your department stays in sync.</p>
-          <div className="banner-actions">
-            <Button variant="light" icon={CalendarDays} onClick={() => onNavigate('Timetable')}>View timetable <ArrowUpRight size={15} /></Button>
-            <Button variant="glass" icon={Zap} onClick={onGenerate}>Generate schedule</Button>
-          </div>
-        </div>
-        <div className="banner-art">
-          <div className="art-orbit orbit-one"></div><div className="art-orbit orbit-two"></div>
-          <div className="art-calendar">
-            <div className="art-cal-head"><span></span><span></span><span></span></div>
-            <div className="art-cal-title">THIS WEEK</div>
-            <div className="art-cal-grid">{Array.from({ length: 21 }, (_, i) => <i key={i} className={[3, 5, 10, 12, 16].includes(i) ? 'marked' : ''}></i>)}</div>
-            <div className="art-check"><Check size={17} /></div>
-          </div>
-          <div className="art-floating"><CheckCircle2 size={16} /><div><b>Conflict-free</b><small>Schedule preview</small></div></div>
-        </div>
-        <div className="banner-decoration"></div>
-      </div>
-
-      <div className="section-heading">
-        <div><h2>Overview</h2><p>Key scheduling metrics for your department</p></div>
-        <button className="filter-button" onClick={() => setFilter(filter === 'This week' ? 'This semester' : 'This week')}><CalendarDays size={15} />{filter}<ChevronDown size={14} /></button>
-      </div>
-      <div className="stats-grid">
-        <StatCard title="Scheduled lectures" value={String(classes.length).padStart(2, '0')} change="+12.5%" foot="vs. last week" icon={CalendarCheck} tone="purple" />
-        <StatCard title="Active courses" value={String(courses.length).padStart(2, '0')} foot="this semester" icon={BookOpen} tone="blue" />
-        <StatCard title="Lecturers" value={String(people.length).padStart(2, '0')} foot="across the department" icon={Users} tone="green" />
-        <StatCard title="Room utilisation" value={`${stats.roomUtil}%`} foot="based on scheduled lectures" icon={DoorOpen} tone="orange" />
-      </div>
-
-      <div className="dashboard-grid">
-        <DailySchedule classes={classes} onViewTimetable={() => onNavigate('Timetable')} onSelect={(c) => notify(`${c.title} details selected`)} />
-        <AlertWidget stats={stats} onViewProgress={() => onNavigate('Progress')} />
-      </div>
-
-      <div className="dashboard-bottom">
-        <UpcomingEvents classes={classes} onViewTimetable={() => onNavigate('Timetable')} />
-        <section className="panel mini-panel">
-          <div className="panel-head"><div><h3>Quick actions</h3><p>Common tasks, one click away</p></div></div>
-          <div className="quick-actions">
-            <button onClick={onAddLecture}><span className="quick-icon purple"><Plus size={17} /></span><span><b>Add a lecture</b><small>Schedule a new class</small></span><ChevronRight size={16} /></button>
-            <button onClick={onGenerate}><span className="quick-icon blue"><Sparkles size={17} /></span><span><b>Generate timetable</b><small>Auto-build a draft schedule</small></span><ChevronRight size={16} /></button>
-            <button onClick={() => onNavigate('Progress')}><span className="quick-icon green"><CalendarCheck size={17} /></span><span><b>Check progress</b><small>Review workload and room usage</small></span><ChevronRight size={16} /></button>
-          </div>
-        </section>
-      </div>
-    </>
-  );
-}
