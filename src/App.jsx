@@ -4,12 +4,13 @@ import {
   Search, ChevronDown, ChevronLeft, ChevronRight, Plus, Clock3, MapPin,
   GraduationCap, Menu, X, Sparkles, Download, CheckCircle2, AlertTriangle,
   SlidersHorizontal, CalendarCheck, UserRound, BarChart3, LogOut, Zap,
-  CircleHelp, MoreHorizontal, ArrowUpRight, Filter, Check, XCircle
+  CircleHelp, MoreHorizontal, ArrowUpRight, Filter, Check, XCircle, Moon, Sun
 } from 'lucide-react';
 import { initialClasses, days, times, courses, initialPeople, initialRooms, initialBatches, fmt, loadSaved } from './data';
 import { Dashboard, Timetable, Courses, Lecturers, Rooms, Batches, Availability, Analytics, SettingsPage } from './pages';
 import { Modal } from './components/Modal';
 import './styles.css';
+import './theme.css';
 import { Login } from './components/Login';
 
 const navGroups = [
@@ -21,6 +22,7 @@ const navGroups = [
 // Main application shell: manages login state, navigation, demo data, and page routing.
 function App() {
   const [authenticated, setAuthenticated] = useState(() => localStorage.getItem('unischedule:authenticated') === 'true');
+  const [theme, setTheme] = useState(() => localStorage.getItem('unischedule:theme') === 'dark' ? 'dark' : 'light');
   const [page, setPage] = useState('Dashboard');
   const [role, setRole] = useState('Administrator');
   const [classes, setClasses] = useState(() => loadSaved('classes', initialClasses));
@@ -48,6 +50,10 @@ function App() {
   ]);
   const [form, setForm] = useState({});
   const [conflicts, setConflicts] = useState([]);
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem('unischedule:theme', theme);
+  }, [theme]);
   const filteredCourses = useMemo(() => courseList.filter(c => `${c.code} ${c.title} ${c.lecturer}`.toLowerCase().includes(query.toLowerCase())), [courseList, query]);
   const notify = msg => { setToast(msg); window.setTimeout(() => setToast(''), 3000); };
   const openAdd = type => { setModalType(type); setForm({}); setShowModal(true); };
@@ -107,7 +113,7 @@ function App() {
     <nav>{navGroups.map(group=><div className="nav-group" key={group.label}><div className="nav-label">{group.label}</div>{group.items.map(item=>{const Icon=item.icon;return <button key={item.id} className={`nav-item ${page===item.id?'active':''}`} onClick={()=>{setPage(item.id);setSidebarOpen(false)}}><Icon size={18}/><span>{item.id}</span>{item.id==='Timetable'&&<span className="nav-pill">W06</span>}</button>})}</div>)}</nav>
     <div className="sidebar-bottom"><div className="help-card"><div className="help-icon"><CircleHelp size={18}/></div><b>Need a hand?</b><p>Get help with timetable planning and system tools.</p><button onClick={()=>notify('Help centre is a demo feature')}>Visit help centre <ArrowUpRight size={14}/></button></div><div className="profile"><div className="avatar admin-avatar">AD</div><div className="profile-info"><b>{JSON.parse(localStorage.getItem('unischedule:user') || '{}').name || 'Admin Demo'}</b><small>{role}</small></div><button className="icon-btn" title="Log out" onClick={handleLogout}><LogOut size={17}/></button></div></div></>;
   return !authenticated ? <Login onLogin={handleLogin} /> : <div className="app-shell"><aside className={`sidebar ${sidebarOpen?'sidebar-open':''}`}>{menu}</aside>{sidebarOpen&&<div className="mobile-scrim" onClick={()=>setSidebarOpen(false)}></div>}
-    <main className="main-area"><header className="topbar"><div className="topbar-left"><button className="icon-btn mobile-menu" onClick={()=>setSidebarOpen(true)}><Menu size={20}/></button><div className="breadcrumb">Workspace <span>/</span> <b>{page}</b></div></div><div className="topbar-actions"><div className="semester-select"><span className="semester-dot"></span><span>Semester 2, 2026</span><ChevronDown size={15}/></div><div className="notification-wrap"><button className="icon-btn notification-btn" onClick={()=>setNotificationsOpen(!notificationsOpen)}><Bell size={19}/>{notices.some(n=>n.unread)&&<i/>}</button>{notificationsOpen&&<div className="notification-pop"><div className="pop-head"><b>Notifications</b><button onClick={markAllRead}>Mark all read</button></div>{notices.map(n=><div className={`notice ${n.unread?'unread':''}`} key={n.id}><span className="notice-dot"></span><div><b>{n.title}</b><p>{n.text}</p><small>{n.time}</small></div></div>)}</div>}</div><div className="top-avatar">AD</div></div></header>
+    <main className="main-area"><header className="topbar"><div className="topbar-left"><button className="icon-btn mobile-menu" onClick={()=>setSidebarOpen(true)}><Menu size={20}/></button><div className="breadcrumb">Workspace <span>/</span> <b>{page}</b></div></div><div className="topbar-actions"><div className="semester-select"><span className="semester-dot"></span><span>Semester 2, 2026</span><ChevronDown size={15}/></div><button className="icon-btn theme-toggle" type="button" title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} aria-pressed={theme === 'dark'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={19}/> : <Moon size={19}/>}</button><div className="notification-wrap"><button className="icon-btn notification-btn" onClick={()=>setNotificationsOpen(!notificationsOpen)}><Bell size={19}/>{notices.some(n=>n.unread)&&<i/>}</button>{notificationsOpen&&<div className="notification-pop"><div className="pop-head"><b>Notifications</b><button onClick={markAllRead}>Mark all read</button></div>{notices.map(n=><div className={`notice ${n.unread?'unread':''}`} key={n.id}><span className="notice-dot"></span><div><b>{n.title}</b><p>{n.text}</p><small>{n.time}</small></div></div>)}</div>}</div><div className="top-avatar">AD</div></div></header>
     <div className="page-content"><div className="page-heading"><div><div className="eyebrow"><Sparkles size={14}/> SMART SCHEDULING WORKSPACE</div><h1>{page==='Dashboard'?'Good evening, Admin':page}</h1><p>{page==='Dashboard'?'Here’s what’s happening with your academic schedule today.':page==='Timetable'?'Plan, review and manage your weekly lecture schedule.':`Manage your department’s ${page.toLowerCase()} in one place.`}</p></div><div className="heading-actions"><button className="btn btn-secondary" onClick={exportCSV}><Download size={16}/> Export</button><button className="btn btn-primary" onClick={()=>openAdd(page==='Timetable'?'class':page==='Courses'?'course':page==='Lecturers'?'lecturer':page==='Rooms'?'room':page==='Batches'?'batch':'class')}><Plus size={17}/> {page==='Timetable'?'Add lecture':`Add ${page==='Dashboard'?'new item':page.slice(0,-1).toLowerCase()}`}</button></div></div>
     {page==='Dashboard'&&<Dashboard classes={classes} people={people} rooms={rooms} batches={batches} courseList={courseList} setPage={setPage} openAdd={openAdd} generate={generateTimetable} exportCSV={exportCSV} notify={notify}/>} 
     {page==='Timetable'&&<Timetable classes={classes} setClasses={setClasses} batches={batches} batchFilter={batchFilter} setBatchFilter={setBatchFilter} selectedDay={selectedDay} setSelectedDay={setSelectedDay} openAdd={openAdd} exportCSV={exportCSV} conflicts={conflicts} setConflicts={setConflicts} notify={notify}/>}

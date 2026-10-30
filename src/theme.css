@@ -1,0 +1,149 @@
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  color: #e2e8f0;
+  background: #111827;
+  --navy: #101c35;
+  --muted: #9aa7bc;
+  --border: #2b3548;
+  --purple: #9a8cff;
+  --light-purple: #282448;
+}
+
+:root[data-theme='dark'] body,
+:root[data-theme='dark'] #root,
+:root[data-theme='dark'] .app-shell,
+:root[data-theme='dark'] .main-area {
+  background: #111827;
+  color: #e2e8f0;
+}
+
+:root[data-theme='dark'] .topbar,
+:root[data-theme='dark'] .notification-pop,
+:root[data-theme='dark'] .panel,
+:root[data-theme='dark'] .stat-card,
+:root[data-theme='dark'] .room-card,
+:root[data-theme='dark'] .batch-card,
+:root[data-theme='dark'] .modal,
+:root[data-theme='dark'] .login-card,
+:root[data-theme='dark'] .login-form-panel {
+  background: #1b2535;
+  color: #e2e8f0;
+  border-color: #303b4e;
+}
+
+:root[data-theme='dark'] .semester-select,
+:root[data-theme='dark'] .btn-secondary,
+:root[data-theme='dark'] .filter-button,
+:root[data-theme='dark'] .today-btn,
+:root[data-theme='dark'] .outline-wide,
+:root[data-theme='dark'] .select-control,
+:root[data-theme='dark'] .searchbox,
+:root[data-theme='dark'] .settings-select,
+:root[data-theme='dark'] .field input,
+:root[data-theme='dark'] .field select,
+:root[data-theme='dark'] .field textarea,
+:root[data-theme='dark'] .login-input-wrap,
+:root[data-theme='dark'] .login-role {
+  background: #151e2c;
+  color: #e2e8f0;
+  border-color: #3a4659;
+}
+
+:root[data-theme='dark'] .page-heading h1,
+:root[data-theme='dark'] .panel-head h3,
+:root[data-theme='dark'] .settings-title h3,
+:root[data-theme='dark'] .stat-value,
+:root[data-theme='dark'] .table-footer b,
+:root[data-theme='dark'] .resource-stats b,
+:root[data-theme='dark'] .room-card h3,
+:root[data-theme='dark'] .batch-card h3,
+:root[data-theme='dark'] .modal h2,
+:root[data-theme='dark'] .field label,
+:root[data-theme='dark'] .login-welcome h1 {
+  color: #f1f5f9;
+}
+
+:root[data-theme='dark'] .breadcrumb,
+:root[data-theme='dark'] .page-heading p,
+:root[data-theme='dark'] .panel-head p,
+:root[data-theme='dark'] .settings-title p,
+:root[data-theme='dark'] .field-help,
+:root[data-theme='dark'] .stat-foot,
+:root[data-theme='dark'] .upcoming-row,
+:root[data-theme='dark'] .health-metrics,
+:root[data-theme='dark'] .room-card-meta,
+:root[data-theme='dark'] .batch-card > p,
+:root[data-theme='dark'] .timetable-summary,
+:root[data-theme='dark'] .time-label,
+:root[data-theme='dark'] .table-footer,
+:root[data-theme='dark'] .modal > p,
+:root[data-theme='dark'] .footer {
+  color: #a6b2c5;
+}
+
+:root[data-theme='dark'] .notice.unread,
+:root[data-theme='dark'] .view-switch button.selected,
+:root[data-theme='dark'] .view-switch,
+:root[data-theme='dark'] thead,
+:root[data-theme='dark'] .today-cell,
+:root[data-theme='dark'] .availability-days button.day-selected,
+:root[data-theme='dark'] .availability-days button,
+:root[data-theme='dark'] .score-ring,
+:root[data-theme='dark'] .score-ring:before,
+:root[data-theme='dark'] .resource-stats > div,
+:root[data-theme='dark'] .login-demo,
+:root[data-theme='dark'] .empty-state {
+  background: #292644;
+}
+
+:root[data-theme='dark'] .notice,
+:root[data-theme='dark'] .pop-head,
+:root[data-theme='dark'] .upcoming-row,
+:root[data-theme='dark'] .security-row,
+:root[data-theme='dark'] .profile,
+:root[data-theme='dark'] .time-head,
+:root[data-theme='dark'] .day-head,
+:root[data-theme='dark'] .table-footer,
+:root[data-theme='dark'] table th,
+:root[data-theme='dark'] table td,
+:root[data-theme='dark'] .settings-divider {
+  border-color: #303b4e;
+}
+
+:root[data-theme='dark'] .icon-btn {
+  color: #b7c2d3;
+}
+
+:root[data-theme='dark'] .icon-btn:hover,
+:root[data-theme='dark'] .btn-secondary:hover {
+  background: #293447;
+  color: #f1f5f9;
+}
+
+:root[data-theme='dark'] .searchbox input,
+:root[data-theme='dark'] input,
+:root[data-theme='dark'] select,
+:root[data-theme='dark'] textarea {
+  color: #e2e8f0;
+}
+
+:root[data-theme='dark'] input::placeholder,
+:root[data-theme='dark'] textarea::placeholder,
+:root[data-theme='dark'] .searchbox input::placeholder {
+  color: #8794a8;
+}
+
+:root[data-theme='dark'] table,
+:root[data-theme='dark'] .timetable-grid,
+:root[data-theme='dark'] .calendar-grid {
+  color: #d7deea;
+}
+
+:root[data-theme='dark'] .login-page,
+:root[data-theme='dark'] .login-brand-panel {
+  background-color: #111827;
+}
+
+:root[data-theme='dark'] .theme-toggle {
+  color: #f6c85f;
+}
