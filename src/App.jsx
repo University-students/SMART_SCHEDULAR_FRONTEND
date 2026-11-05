@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   LayoutDashboard, CalendarDays, BookOpen, Users, DoorOpen, Bell, Settings,
   Search, ChevronDown, ChevronLeft, ChevronRight, Plus, Clock3, MapPin,
   GraduationCap, Menu, X, Sparkles, Download, CheckCircle2, AlertTriangle,
   SlidersHorizontal, CalendarCheck, UserRound, BarChart3, LogOut, Zap,
-  CircleHelp, MoreHorizontal, ArrowUpRight, Filter, Check, XCircle, Moon, Sun
+  CircleHelp, MoreHorizontal, ArrowUpRight, Filter, Check, XCircle, Moon, Sun, Trash2
 } from 'lucide-react';
 import { initialClasses, days, times, courses, initialPeople, initialRooms, initialBatches, fmt, loadSaved } from './data';
 import { Dashboard, Timetable, Courses, Lecturers, Rooms, Batches, Availability, Analytics, SettingsPage } from './pages';
@@ -43,6 +43,7 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedDay, setSelectedDay] = useState('All days');
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const notificationRef = useRef(null);
   const [notices, setNotices] = useState([
     { id: 1, title: 'Room update', text: 'ICT 2202 moved to Lab 01.', time: '10 min ago', unread: true },
     { id: 2, title: 'Timetable published', text: 'Week 06 timetable is ready to view.', time: '1 hour ago', unread: true },
@@ -50,6 +51,21 @@ function App() {
   ]);
   const [form, setForm] = useState({});
   const [conflicts, setConflicts] = useState([]);
+  useEffect(() => {
+    if (!notificationsOpen) return undefined;
+    const closeOnOutsideClick = event => {
+      if (!notificationRef.current?.contains(event.target)) setNotificationsOpen(false);
+    };
+    const closeOnEscape = event => {
+      if (event.key === 'Escape') setNotificationsOpen(false);
+    };
+    document.addEventListener('pointerdown', closeOnOutsideClick);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOnOutsideClick);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [notificationsOpen]);
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     localStorage.setItem('unischedule:theme', theme);
@@ -103,7 +119,8 @@ function App() {
       notify('Batch added successfully'); setShowModal(false);
     }
   };
-  const markAllRead = () => setNotices(notices.map(n => ({ ...n, unread: false })));
+  const markAllRead = () => setNotices(current => current.map(n => ({ ...n, unread: false })));
+  const removeNotice = id => setNotices(current => current.filter(n => n.id !== id));
   // Save demo login state in this browser. Use a backend for real authentication.
   const handleLogin = (user) => { localStorage.setItem('unischedule:authenticated', 'true'); localStorage.setItem('unischedule:user', JSON.stringify(user)); setRole(user.role); setAuthenticated(true); };
   // Clear the local demo session and return to the login page.
@@ -113,7 +130,7 @@ function App() {
     <nav>{navGroups.map(group=><div className="nav-group" key={group.label}><div className="nav-label">{group.label}</div>{group.items.map(item=>{const Icon=item.icon;return <button key={item.id} className={`nav-item ${page===item.id?'active':''}`} onClick={()=>{setPage(item.id);setSidebarOpen(false)}}><Icon size={18}/><span>{item.id}</span>{item.id==='Timetable'&&<span className="nav-pill">W06</span>}</button>})}</div>)}</nav>
     <div className="sidebar-bottom"><div className="help-card"><div className="help-icon"><CircleHelp size={18}/></div><b>Need a hand?</b><p>Get help with timetable planning and system tools.</p><button onClick={()=>notify('Help centre is a demo feature')}>Visit help centre <ArrowUpRight size={14}/></button></div><div className="profile"><div className="avatar admin-avatar">AD</div><div className="profile-info"><b>{JSON.parse(localStorage.getItem('unischedule:user') || '{}').name || 'Admin Demo'}</b><small>{role}</small></div><button className="icon-btn" title="Log out" onClick={handleLogout}><LogOut size={17}/></button></div></div></>;
   return !authenticated ? <Login onLogin={handleLogin} /> : <div className="app-shell"><aside className={`sidebar ${sidebarOpen?'sidebar-open':''}`}>{menu}</aside>{sidebarOpen&&<div className="mobile-scrim" onClick={()=>setSidebarOpen(false)}></div>}
-    <main className="main-area"><header className="topbar"><div className="topbar-left"><button className="icon-btn mobile-menu" onClick={()=>setSidebarOpen(true)}><Menu size={20}/></button><div className="breadcrumb">Workspace <span>/</span> <b>{page}</b></div></div><div className="topbar-actions"><div className="semester-select"><span className="semester-dot"></span><span>Semester 2, 2026</span><ChevronDown size={15}/></div><button className="icon-btn theme-toggle" type="button" title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} aria-pressed={theme === 'dark'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={19}/> : <Moon size={19}/>}</button><div className="notification-wrap"><button className="icon-btn notification-btn" onClick={()=>setNotificationsOpen(!notificationsOpen)}><Bell size={19}/>{notices.some(n=>n.unread)&&<i/>}</button>{notificationsOpen&&<div className="notification-pop"><div className="pop-head"><b>Notifications</b><button onClick={markAllRead}>Mark all read</button></div>{notices.map(n=><div className={`notice ${n.unread?'unread':''}`} key={n.id}><span className="notice-dot"></span><div><b>{n.title}</b><p>{n.text}</p><small>{n.time}</small></div></div>)}</div>}</div><div className="top-avatar">AD</div></div></header>
+    <main className="main-area"><header className="topbar"><div className="topbar-left"><button className="icon-btn mobile-menu" onClick={()=>setSidebarOpen(true)}><Menu size={20}/></button><div className="breadcrumb">Workspace <span>/</span> <b>{page}</b></div></div><div className="topbar-actions"><div className="semester-select"><span className="semester-dot"></span><span>Semester 2, 2026</span><ChevronDown size={15}/></div><button className="icon-btn theme-toggle" type="button" title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} aria-pressed={theme === 'dark'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={19}/> : <Moon size={19}/>}</button><div className="notification-wrap" ref={notificationRef}><button className="icon-btn notification-btn" type="button" aria-label="Notifications" aria-expanded={notificationsOpen} onClick={()=>setNotificationsOpen(open=>!open)}><Bell size={19}/>{notices.some(n=>n.unread)&&<i/>}</button>{notificationsOpen&&<div className="notification-pop"><div className="pop-head"><b>Notifications</b><button type="button" onClick={markAllRead}>Mark all read</button></div>{notices.length ? notices.map(n=><div className={`notice ${n.unread?'unread':''}`} key={n.id}><span className="notice-dot"></span><div className="notice-content"><b>{n.title}</b><p>{n.text}</p><small>{n.time}</small></div><button className="notice-delete" type="button" aria-label={`Clear ${n.title} notification`} title="Clear notification" onClick={()=>removeNotice(n.id)}><Trash2 size={14}/></button></div>) : <div className="notification-empty"><Bell size={18}/><span>No notifications yet.</span></div>}</div>}</div><div className="top-avatar">AD</div></div></header>
     <div className="page-content"><div className="page-heading"><div><div className="eyebrow"><Sparkles size={14}/> SMART SCHEDULING WORKSPACE</div><h1>{page==='Dashboard'?'Good evening, Admin':page}</h1><p>{page==='Dashboard'?'Here’s what’s happening with your academic schedule today.':page==='Timetable'?'Plan, review and manage your weekly lecture schedule.':`Manage your department’s ${page.toLowerCase()} in one place.`}</p></div><div className="heading-actions"><button className="btn btn-secondary" onClick={exportCSV}><Download size={16}/> Export</button><button className="btn btn-primary" onClick={()=>openAdd(page==='Timetable'?'class':page==='Courses'?'course':page==='Lecturers'?'lecturer':page==='Rooms'?'room':page==='Batches'?'batch':'class')}><Plus size={17}/> {page==='Timetable'?'Add lecture':`Add ${page==='Dashboard'?'new item':page.slice(0,-1).toLowerCase()}`}</button></div></div>
     {page==='Dashboard'&&<Dashboard classes={classes} people={people} rooms={rooms} batches={batches} courseList={courseList} setPage={setPage} openAdd={openAdd} generate={generateTimetable} exportCSV={exportCSV} notify={notify}/>} 
     {page==='Timetable'&&<Timetable classes={classes} setClasses={setClasses} batches={batches} batchFilter={batchFilter} setBatchFilter={setBatchFilter} selectedDay={selectedDay} setSelectedDay={setSelectedDay} openAdd={openAdd} exportCSV={exportCSV} conflicts={conflicts} setConflicts={setConflicts} notify={notify}/>}
