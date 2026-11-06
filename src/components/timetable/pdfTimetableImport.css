@@ -1,0 +1,162 @@
+.pdf-import-panel {
+  margin-bottom: 18px;
+  padding: 20px;
+}
+
+.pdf-import-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.pdf-import-heading h2 {
+  margin: 0;
+  color: #17233b;
+  font: 700 16px Manrope, sans-serif;
+}
+
+.pdf-import-heading p {
+  max-width: 700px;
+  margin: 7px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.pdf-import-heading .eyebrow {
+  margin-bottom: 8px;
+}
+
+.pdf-file-input {
+  display: none;
+}
+
+.pdf-import-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 15px;
+  padding: 10px 12px;
+  border: 1px solid #f2c6c6;
+  border-radius: 8px;
+  background: #fff6f6;
+  color: #a93636;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.pdf-import-preview {
+  margin-top: 17px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border);
+}
+
+.pdf-preview-heading,
+.pdf-preview-heading > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pdf-preview-heading {
+  justify-content: space-between;
+}
+
+.pdf-preview-heading > div {
+  color: #3a9c72;
+  font-size: 11px;
+}
+
+.pdf-preview-heading b {
+  color: #26334b;
+}
+
+.pdf-preview-heading span {
+  color: var(--muted);
+}
+
+.pdf-preview-table-wrap {
+  margin-top: 12px;
+  overflow-x: auto;
+}
+
+.pdf-preview-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 11px;
+}
+
+.pdf-preview-table th,
+.pdf-preview-table td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.pdf-preview-table th {
+  color: var(--muted);
+  font-size: 9px;
+  letter-spacing: .5px;
+}
+
+.pdf-preview-table td {
+  color: #35415a;
+}
+
+.pdf-preview-table td small {
+  display: block;
+  margin-top: 3px;
+  color: var(--muted);
+  white-space: normal;
+}
+
+.pdf-preview-more {
+  display: block;
+  margin-top: 8px;
+  color: var(--muted);
+}
+
+.pdf-replace-note {
+  margin: 13px 0 10px;
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.pdf-import-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.pdf-spinner {
+  animation: pdf-spin 1s linear infinite;
+}
+
+@keyframes pdf-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 650px) {
+  .pdf-import-panel {
+    padding: 15px;
+  }
+
+  .pdf-import-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .pdf-preview-heading > div {
+    flex-wrap: wrap;
+  }
+
+  .pdf-import-actions {
+    flex-direction: column-reverse;
+  }
+
+  .pdf-import-actions .btn {
+    width: 100%;
+  }
+}

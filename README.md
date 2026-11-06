@@ -30,6 +30,8 @@ These are frontend demo credentials only. Do not use them for real accounts.
 - `src/pages.jsx` — simple export file for all pages.
 - `src/pages/Dashboard.jsx` — dashboard overview and quick actions.
 - `src/pages/Timetable.jsx` — weekly timetable and conflict checks.
+- `src/components/timetable/PdfLecturerImport.jsx` — browser-side PDF timetable import and lecturer schedule preview.
+- `src/services/pdfTimetableService.js` — PDF text extraction and weekday/course/lecturer mapping.
 - `src/pages/Courses.jsx` — course list.
 - `src/pages/Lecturers.jsx` — lecturer list.
 - `src/pages/Rooms.jsx` — room management view.
@@ -46,6 +48,13 @@ These are frontend demo credentials only. Do not use them for real accounts.
 ## Notes
 
 This is a frontend prototype. Browser local storage is used for demo persistence. A production system still needs an Express/Node API, MongoDB, server-side authentication/authorization, and real-time notifications. Review all features before using it for real scheduling.
+
+## Import a lecturer timetable from PDF
+- Open **Timetable** and choose **Choose PDF** in the PDF timetable import panel.
+- The importer reads text-based weekday schedules that have a time column, Monday-to-Friday columns, and a separate lecturer list keyed by course code.
+- Review the detected sessions, then add them to the current timetable or replace it. The imported schedule can be filtered by lecturer and exported like other timetable entries.
+- PDF files are parsed in the browser and are not uploaded. Image-only/scanned PDFs and unsupported table layouts need OCR or a different document format.
+- The default Year 2 Semester II demo schedule is based on `Year 2 Sem II.pdf`, including its course codes, lecturers, rooms, and half-hour time slots.
 
 ## Login and account registration
 - Use **Create account** on the login screen to register a new local demo account.

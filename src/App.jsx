@@ -6,7 +6,7 @@ import {
   SlidersHorizontal, CalendarCheck, UserRound, BarChart3, LogOut, Zap,
   CircleHelp, MoreHorizontal, ArrowUpRight, Filter, Check, XCircle, Moon, Sun, Trash2
 } from 'lucide-react';
-import { initialClasses, days, times, courses, initialPeople, initialRooms, initialBatches, fmt, loadSaved } from './data';
+import { initialClasses, days, times, courses, initialPeople, initialRooms, initialBatches, fmt, loadSaved, migrateLegacyDemoData } from './data';
 import { Dashboard, Timetable, Courses, Lecturers, Rooms, Batches, Availability, Analytics, SettingsPage } from './pages';
 import { Modal } from './components/Modal';
 import './styles.css';
@@ -25,7 +25,7 @@ function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem('unischedule:theme') === 'dark' ? 'dark' : 'light');
   const [page, setPage] = useState('Dashboard');
   const [role, setRole] = useState('Administrator');
-  const [classes, setClasses] = useState(() => loadSaved('classes', initialClasses));
+  const [classes, setClasses] = useState(() => { migrateLegacyDemoData(); return loadSaved('classes', initialClasses); });
   const [people, setPeople] = useState(() => loadSaved('people', initialPeople));
   const [rooms, setRooms] = useState(() => loadSaved('rooms', initialRooms));
   const [batches, setBatches] = useState(() => loadSaved('batches', initialBatches));
@@ -97,6 +97,69 @@ function App() {
     if (unplaced.length) notify(`Draft created with ${unplaced.length} unscheduled course(s): ${unplaced.join(', ')}. Add more time slots/rooms and try again.`);
     else notify('Conflict-checked draft timetable generated. Review before publishing.');
   };
+  const importTimetable = (importedClasses, replace) => {
+    if (!importedClasses.length) throw new Error('There are no lecture sessions to import.');
+    const nextClasses = replace ? importedClasses : [...classes, ...importedClasses];
+    const importedIds = new Set(importedClasses.map(classItem => classItem.id));
+    const overlaps = [];
+    nextClasses.forEach((classItem, index) => {
+      nextClasses.slice(index + 1).forEach(other => {
+        const involvesImport = replace || importedIds.has(classItem.id) || importedIds.has(other.id);
+        const overlapsTime = classItem.day === other.day && classItem.start < other.end && classItem.end > other.start;
+        const sharesResource = classItem.room === other.room || classItem.lecturer === other.lecturer || classItem.batch === other.batch;
+        if (involvesImport && overlapsTime && sharesResource) {
+          overlaps.push(`Conflict with ${other.code} (${days[other.day]}, ${fmt(other.start)}) — same room, lecturer, or batch.`);
+        }
+      });
+    });
+    if (overlaps.length) {
+      setConflicts([...new Set(overlaps)]);
+      throw new Error('Resolve the listed conflicts or replace the current timetable.');
+    }
+
+    setClasses(nextClasses);
+    setBatchFilter('All batches');
+    setSelectedDay('All days');
+    setConflicts([]);
+
+    const hoursByLecturer = new Map();
+    const coursesByCode = new Map();
+    nextClasses.forEach(classItem => {
+      hoursByLecturer.set(classItem.lecturer, (hoursByLecturer.get(classItem.lecturer) || 0) + classItem.end - classItem.start);
+      if (!coursesByCode.has(classItem.code)) coursesByCode.set(classItem.code, classItem);
+    });
+    setPeople(current => {
+      const updated = new Map(current.map(person => [person.name, person]));
+      hoursByLecturer.forEach((hours, name) => {
+        if (!name || name === 'Unassigned lecturer') return;
+        const existing = updated.get(name);
+        const initials = name.split(/\s+/).slice(-2).map(part => part[0]).join('').toUpperCase();
+        updated.set(name, {
+          ...(existing || { name, role: 'Lecturer', area: 'Imported timetable', status: 'Available' }),
+          hours,
+          initials: existing?.initials || initials,
+        });
+      });
+      return [...updated.values()];
+    });
+    setCourseList(current => {
+      const updated = new Map(current.map(course => [course.code, course]));
+      coursesByCode.forEach((classItem, code) => {
+        const hours = nextClasses.filter(item => item.code === code).reduce((total, item) => total + item.end - item.start, 0);
+        updated.set(code, {
+          ...(updated.get(code) || { students: 40 }),
+          code,
+          title: classItem.title,
+          lecturer: classItem.lecturer,
+          room: classItem.room,
+          batch: classItem.batch,
+          hours: `${hours} hrs`,
+        });
+      });
+      return [...updated.values()];
+    });
+    notify(replace ? 'PDF timetable imported. Current timetable replaced.' : 'PDF timetable added to the current schedule.');
+  };
   const saveModal = e => {
     e.preventDefault();
     if (modalType === 'class') {
@@ -133,7 +196,7 @@ function App() {
     <main className="main-area"><header className="topbar"><div className="topbar-left"><button className="icon-btn mobile-menu" onClick={()=>setSidebarOpen(true)}><Menu size={20}/></button><div className="breadcrumb">Workspace <span>/</span> <b>{page}</b></div></div><div className="topbar-actions"><div className="semester-select"><span className="semester-dot"></span><span>Semester 2, 2026</span><ChevronDown size={15}/></div><button className="icon-btn theme-toggle" type="button" title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`} aria-pressed={theme === 'dark'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}>{theme === 'dark' ? <Sun size={19}/> : <Moon size={19}/>}</button><div className="notification-wrap" ref={notificationRef}><button className="icon-btn notification-btn" type="button" aria-label="Notifications" aria-expanded={notificationsOpen} onClick={()=>setNotificationsOpen(open=>!open)}><Bell size={19}/>{notices.some(n=>n.unread)&&<i/>}</button>{notificationsOpen&&<div className="notification-pop"><div className="pop-head"><b>Notifications</b><button type="button" onClick={markAllRead}>Mark all read</button></div>{notices.length ? notices.map(n=><div className={`notice ${n.unread?'unread':''}`} key={n.id}><span className="notice-dot"></span><div className="notice-content"><b>{n.title}</b><p>{n.text}</p><small>{n.time}</small></div><button className="notice-delete" type="button" aria-label={`Clear ${n.title} notification`} title="Clear notification" onClick={()=>removeNotice(n.id)}><Trash2 size={14}/></button></div>) : <div className="notification-empty"><Bell size={18}/><span>No notifications yet.</span></div>}</div>}</div><div className="top-avatar">AD</div></div></header>
     <div className="page-content"><div className="page-heading"><div><div className="eyebrow"><Sparkles size={14}/> SMART SCHEDULING WORKSPACE</div><h1>{page==='Dashboard'?'Good evening, Admin':page}</h1><p>{page==='Dashboard'?'Here’s what’s happening with your academic schedule today.':page==='Timetable'?'Plan, review and manage your weekly lecture schedule.':`Manage your department’s ${page.toLowerCase()} in one place.`}</p></div><div className="heading-actions"><button className="btn btn-secondary" onClick={exportCSV}><Download size={16}/> Export</button><button className="btn btn-primary" onClick={()=>openAdd(page==='Timetable'?'class':page==='Courses'?'course':page==='Lecturers'?'lecturer':page==='Rooms'?'room':page==='Batches'?'batch':'class')}><Plus size={17}/> {page==='Timetable'?'Add lecture':`Add ${page==='Dashboard'?'new item':page.slice(0,-1).toLowerCase()}`}</button></div></div>
     {page==='Dashboard'&&<Dashboard classes={classes} people={people} rooms={rooms} batches={batches} courseList={courseList} setPage={setPage} openAdd={openAdd} generate={generateTimetable} exportCSV={exportCSV} notify={notify}/>} 
-    {page==='Timetable'&&<Timetable classes={classes} setClasses={setClasses} batches={batches} batchFilter={batchFilter} setBatchFilter={setBatchFilter} selectedDay={selectedDay} setSelectedDay={setSelectedDay} openAdd={openAdd} exportCSV={exportCSV} conflicts={conflicts} setConflicts={setConflicts} notify={notify}/>}
+    {page==='Timetable'&&<Timetable classes={classes} setClasses={setClasses} batches={batches} batchFilter={batchFilter} setBatchFilter={setBatchFilter} selectedDay={selectedDay} setSelectedDay={setSelectedDay} openAdd={openAdd} exportCSV={exportCSV} conflicts={conflicts} setConflicts={setConflicts} notify={notify} importTimetable={importTimetable}/>}
     {page==='Courses'&&<Courses query={query} setQuery={setQuery} filteredCourses={filteredCourses} openAdd={openAdd}/>}
     {page==='Lecturers'&&<Lecturers people={people} query={query} setQuery={setQuery} openAdd={openAdd} notify={notify}/>}
     {page==='Rooms'&&<Rooms rooms={rooms} query={query} setQuery={setQuery} openAdd={openAdd}/>}
