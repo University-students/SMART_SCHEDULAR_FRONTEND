@@ -10,26 +10,15 @@ The project is split into two separate applications:
 - Node.js 20.19 or newer
 - A MongoDB 6+ database (MongoDB Atlas is supported)
 
-## Host frontend and backend together on Render
+## Host frontend and backend separately on Render
 
-Create one Render **Web Service** from the main GitHub repository, select the branch you deploy, and leave **Root Directory** blank. Set:
+Create a Render **Web Service** from this repository for the backend. Set **Root Directory** to `backend`, **Build Command** to `npm ci`, and **Start Command** to `npm start`.
 
-```text
-Build Command: npm ci --prefix backend && npm ci --include=dev --prefix frontend && npm run build --prefix frontend
-Start Command: npm start --prefix backend
-```
+Create a Render **Static Site** from this repository for the frontend. Set **Root Directory** to `frontend`, **Build Command** to `npm ci --include=dev && npm run build`, and **Publish Directory** to `dist`. The `--include=dev` option is required because Vite is used during the build.
 
-The `--include=dev` option is required because Vite is a frontend development dependency used for the production build, while the Render service runs with `NODE_ENV=production`.
+On the frontend Static Site, set `VITE_API_BASE_URL` to `https://<your-backend-service>.onrender.com/api`. On the backend Web Service, set `NODE_ENV=production`, `MONGODB_URI`, `MONGODB_DB=unischedule`, and `WEB_ORIGINS=https://<your-frontend-site>.onrender.com`. Use exact URLs without trailing slashes. Render provides `PORT`; do not set it manually. Keep database and optional SMTP credentials in the backend's Render environment settings, not in GitHub.
 
-Add these environment variables in Render:
-
-```text
-NODE_ENV=production
-MONGODB_URI=<your MongoDB Atlas connection string>
-MONGODB_DB=unischedule
-```
-
-Render provides `PORT`; do not set it manually. Keep database and optional SMTP credentials in Render's environment settings, not in GitHub. Since the frontend and API use the same service, no `VITE_API_BASE_URL`, `WEB_ORIGINS`, or separate frontend service is needed. After deployment, `<your Render service URL>/health` should return a response containing `"status":"ok"`.
+Authentication uses `SameSite=Strict` session cookies. For reliable sign-in across the two services, use frontend and backend custom domains under the same parent domain (for example, `app.example.com` and `api.example.com`). Separate `*.onrender.com` addresses may be treated as cross-site by browsers, which can block session cookies. If you cannot use a custom domain, the recommended alternative is one Render Web Service serving both frontend and backend.
 
 ## Run the project
 
