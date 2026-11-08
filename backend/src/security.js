@@ -42,7 +42,8 @@ export function originGuard(allowedOrigins) {
     if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) return next();
 
     const origin = req.get('origin');
-    if (!origin || !allowed.has(origin)) {
+    const sameOrigin = origin && origin === `${req.protocol}://${req.get('host')}`;
+    if (!origin || (!allowed.has(origin) && !sameOrigin)) {
       return res.status(403).json({ error: { code: 'ORIGIN_NOT_ALLOWED', message: 'Request origin is not allowed.' } });
     }
 

@@ -4,8 +4,14 @@ import { days, fmt, timeInputToHour, timeInputValue } from '../data';
 
 export function Modal({ type, form, setForm, onClose, onSubmit, batches = [], initialBatch = 'ICT 22' }) {
   const set = (key, value) => setForm(current => ({ ...current, [key]: value }));
-  const batchOptions = [...new Set([initialBatch, ...batches.map(batch => batch.name)].filter(Boolean))];
-  const defaultBatch = batchOptions[0] || 'ICT 22';
+  const batchOptions = [...new Set([
+    ...batches.map(batch => batch.name),
+    ...(initialBatch && initialBatch !== 'All batches' ? [initialBatch] : []),
+  ].filter(Boolean))];
+  if (batchOptions.length === 0) batchOptions.push('ICT 22');
+  const defaultBatch = initialBatch && initialBatch !== 'All batches'
+    ? initialBatch
+    : batchOptions[0];
   const startValue = form.start || timeInputValue(8);
   const endValue = form.end || timeInputValue(10);
   const startHour = timeInputToHour(startValue);

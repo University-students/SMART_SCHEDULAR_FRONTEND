@@ -1,6 +1,0 @@
-{
-  "rewrites": [
-    { "source": "/api/:path*", "destination": "https://backend-sch.onrender.com/api/:path*" },
-    { "source": "/health", "destination": "https://backend-sch.onrender.com/health" }
-  ]
-}

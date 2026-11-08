@@ -97,6 +97,7 @@ test('mutating requests require an explicitly allowed origin', async t => {
   assert.equal((await fetch(url, { method: 'POST' })).status, 403);
   assert.equal((await fetch(url, { method: 'POST', headers: { Origin: 'https://attacker.example' } })).status, 403);
   assert.equal((await fetch(url, { method: 'POST', headers: { Origin: 'http://localhost:5173' } })).status, 204);
+  assert.equal((await fetch(url, { method: 'POST', headers: { Origin: new URL(url).origin } })).status, 204);
 });
 
 test('health endpoint emits security headers and API responses are not cached', async t => {
@@ -111,4 +112,28 @@ test('health endpoint emits security headers and API responses are not cached', 
   const apiResponse = await fetch(`http://127.0.0.1:${server.address().port}/api/classes`);
   assert.equal(apiResponse.headers.get('cache-control'), 'no-store');
   assert.equal(apiResponse.status, 401);
+});
+
+test('production serves the built frontend and keeps API requests on API handlers', async t => {
+  const app = createApp({ NODE_ENV: 'production', allowedOrigins: [] });
+  const server = app.listen(0);
+  await once(server, 'listening');
+  t.after(() => new Promise((resolve, reject) => {
+    server.close(error => error ? reject(error) : resolve());
+    server.closeAllConnections();
+  }));
+  const baseUrl = `http://127.0.0.1:${server.address().port}`;
+
+  const home = await fetch(`${baseUrl}/`);
+  assert.equal(home.status, 200);
+  assert.match(home.headers.get('content-type'), /text\/html/);
+  assert.match(await home.text(), /id="root"/);
+
+  const appRoute = await fetch(`${baseUrl}/login`);
+  assert.equal(appRoute.status, 200);
+  assert.match(appRoute.headers.get('content-type'), /text\/html/);
+
+  const apiRoute = await fetch(`${baseUrl}/api/classes`);
+  assert.equal(apiRoute.status, 401);
+  assert.match(apiRoute.headers.get('content-type'), /application\/json/);
 });
