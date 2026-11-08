@@ -10,6 +10,27 @@ The project is split into two separate applications:
 - Node.js 20.19 or newer
 - A MongoDB 6+ database (MongoDB Atlas is supported)
 
+## Host frontend and backend together on Render
+
+Create one Render **Web Service** from the main GitHub repository, select the branch you deploy, and leave **Root Directory** blank. Set:
+
+```text
+Build Command: npm ci --prefix backend && npm ci --include=dev --prefix frontend && npm run build --prefix frontend
+Start Command: npm start --prefix backend
+```
+
+The `--include=dev` option is required because Vite is a frontend development dependency used for the production build, while the Render service runs with `NODE_ENV=production`.
+
+Add these environment variables in Render:
+
+```text
+NODE_ENV=production
+MONGODB_URI=<your MongoDB Atlas connection string>
+MONGODB_DB=unischedule
+```
+
+Render provides `PORT`; do not set it manually. Keep database and optional SMTP credentials in Render's environment settings, not in GitHub. Since the frontend and API use the same service, no `VITE_API_BASE_URL`, `WEB_ORIGINS`, or separate frontend service is needed. After deployment, `<your Render service URL>/health` should return a response containing `"status":"ok"`.
+
 ## Run the project
 
 ### 1. Configure and start the backend
