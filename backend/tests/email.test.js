@@ -194,3 +194,51 @@ test('reminder worker claims each lecture and recipient once', async () => {
   assert.equal(sendCount, 2);
   assert.equal([...deliveries.values()].filter(delivery => delivery.status === 'sent').length, 2);
 });
+
+test('reminder worker retries failed deliveries up to three attempts', async () => {
+  const lecture = { _id: 'lecture-retry', day: 0, start: 8, lecturer: 'Dr. Example', batch: 'ICT 22', code: 'ICT', title: 'Class', room: 'LT 01' };
+  const recipient = { _id: 'user-retry', role: 'Lecturer', name: 'Dr. Example', email: 'lecturer@example.com', emailReminders: true, active: true };
+  const deliveries = new Map();
+  let sendCount = 0;
+  const models = {
+    Lecture: { find: () => ({ lean: async () => [lecture] }) },
+    User: { find: () => ({ lean: async () => [recipient] }) },
+    ReminderDelivery: {
+      async updateOne(filter, update) {
+        if (update.$inc) {
+          const delivery = deliveries.get(filter._id);
+          if (!delivery) {
+            deliveries.set(filter._id, { ...update.$set, attempts: update.$inc.attempts });
+            return { upsertedCount: 1, modifiedCount: 0 };
+          }
+          if (delivery.status !== 'failed' || delivery.attempts >= 3) {
+            throw Object.assign(new Error('Duplicate delivery claim'), { code: 11000 });
+          }
+          Object.assign(delivery, update.$set, { attempts: delivery.attempts + update.$inc.attempts });
+          return { upsertedCount: 0, modifiedCount: 1 };
+        }
+        Object.assign(deliveries.get(filter._id), update.$set);
+        return { modifiedCount: 1 };
+      },
+    },
+  };
+  const scheduler = createReminderScheduler(emailConfig, {
+    models,
+    send: async () => {
+      sendCount += 1;
+      if (sendCount < 3) throw new Error('Temporary SMTP failure');
+    },
+    now: () => new Date('2026-11-02T02:15:00.000Z'),
+    logger: { warn() {}, error() {} },
+  });
+
+  await scheduler.runTick();
+  await scheduler.runTick();
+  await scheduler.runTick();
+  await scheduler.runTick();
+
+  const delivery = [...deliveries.values()][0];
+  assert.equal(sendCount, 3);
+  assert.equal(delivery.attempts, 3);
+  assert.equal(delivery.status, 'sent');
+});

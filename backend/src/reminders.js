@@ -41,7 +41,7 @@ export function createReminderScheduler(config, dependencies = {}) {
       if (isDuplicateKey(error)) return;
       throw error;
     }
-    if (!claim.upsertedCount) return;
+    if (!claim.upsertedCount && !claim.modifiedCount) return;
 
     try {
       await send({ email: recipient.email, lecture, date: clock.date });

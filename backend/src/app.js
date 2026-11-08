@@ -3,6 +3,8 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import authRouter from './routes/auth.js';
 import resourceRouter from './routes/resources.js';
 import { errorHandler, notFound } from './middleware/errors.js';
@@ -48,6 +50,18 @@ export function createApp(config, dependencies = {}) {
   });
   app.use('/api/auth', authRouter);
   app.use('/api', resourceRouter);
+
+  if (config.NODE_ENV === 'production') {
+    const frontendDist = fileURLToPath(new URL('../../frontend/dist', import.meta.url));
+    app.use(express.static(frontendDist));
+    app.get('*', (req, res, next) => {
+      if (req.path === '/api' || req.path.startsWith('/api/')) return next();
+      return res.sendFile(path.join(frontendDist, 'index.html'), error => {
+        if (error) next(error);
+      });
+    });
+  }
+
   app.use(notFound);
   app.use(errorHandler);
   return app;

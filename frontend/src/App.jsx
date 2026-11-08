@@ -313,7 +313,7 @@ function App() {
     {page==='Lecturers'&&<Lecturers people={people} query={query} setQuery={setQuery} openAdd={openAdd} notify={notify}/>}
     {page==='Rooms'&&<Rooms rooms={rooms} query={query} setQuery={setQuery} openAdd={openAdd}/>}
     {page==='Batches'&&<Batches batches={batches} openAdd={openAdd} setPage={setPage} setBatchFilter={setBatchFilter} classes={classes} canManage={canManage}/>}
-    {page==='Availability'&&<Availability people={people} records={availabilityRecords} onSave={saveAvailability} canSubmit={canManage||role==='Lecturer'}/>}
+    {page==='Availability'&&<Availability people={people} records={availabilityRecords} onSave={saveAvailability} canSubmit={canManage||role==='Lecturer'} currentLecturer={role==='Lecturer'?session.name:''}/>}
     {page==='Analytics'&&<Analytics classes={classes} people={people} rooms={rooms}/>}
     {page==='Settings'&&<SettingsPage role={role} notify={notify} user={session} batches={batches} onUserUpdate={setSession}/>}
     <footer className="footer"><span>© 2026 UniSchedule <span className="footer-sep">•</span> Smart academic planning</span><span><span className="status-dot"></span> API connected <span className="footer-sep">•</span> MongoDB</span></footer></div></main>

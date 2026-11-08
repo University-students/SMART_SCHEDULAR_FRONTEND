@@ -3,7 +3,7 @@ import { CalendarCheck, Check, UserRound } from 'lucide-react';
 
 const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
-export function Availability({ people, records = [], onSave, canSubmit = true }) {
+export function Availability({ people, records = [], onSave, canSubmit = true, currentLecturer = '' }) {
   const [selectedDays, setSelectedDays] = useState(() => Object.fromEntries(
     records.map(record => [record.lecturer, record.days || []]),
   ));
@@ -39,6 +39,10 @@ export function Availability({ people, records = [], onSave, canSubmit = true })
     <div className="availability-grid">
       {people.map(person => {
         const saved = records.some(record => record.lecturer === person.name);
+        const canEdit = canSubmit && (
+          !currentLecturer ||
+          currentLecturer.trim().toLowerCase() === person.name.trim().toLowerCase()
+        );
         const days = selectedDays[person.name] || [];
         return (
           <div className="panel availability-card" key={person.id || person.name}>
@@ -55,13 +59,14 @@ export function Availability({ people, records = [], onSave, canSubmit = true })
                   key={day}
                   className={days.includes(day) ? 'day-selected' : ''}
                   aria-pressed={days.includes(day)}
+                  disabled={!canEdit}
                   onClick={() => toggleDay(person.name, day)}
                 >
                   {day}
                 </button>
               ))}
             </div>
-            {canSubmit && (
+            {canEdit && (
               <button type="button" className="btn btn-secondary full-btn" onClick={() => onSave(person.name, days)}>
                 <Check size={15} /> Save availability
               </button>

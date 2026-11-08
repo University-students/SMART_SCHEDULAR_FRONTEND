@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { getConfig } from '../src/config.js';
-import { initialClasses, courses, initialPeople, initialRooms, initialBatches } from '../../src/data.js';
+import { initialClasses, courses, initialPeople, initialRooms, initialBatches } from '../../frontend/src/data.js';
 import { Batch, Course, Lecturer, Lecture, Room } from '../src/models/resources.js';
 
 const seedSets = [
