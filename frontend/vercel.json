@@ -1,6 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://backy-hhpb.onrender.com/api/:path*" },
-    { "source": "/health", "destination": "https://backy-hhpb.onrender.com/health" }
+    { "source": "/api/:path*", "destination": "https://backend-sch.onrender.com/api/:path*" },
+    { "source": "/health", "destination": "https://backend-sch.onrender.com/health" }
   ]
 }
