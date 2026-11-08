@@ -1,0 +1,82 @@
+.print-title,
+.timetable-print-table {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: landscape;
+    margin: 12mm;
+  }
+
+  body * {
+    visibility: hidden !important;
+  }
+
+  .timetable-printable,
+  .timetable-printable * {
+    visibility: visible !important;
+  }
+
+  .timetable-printable {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    background: #fff;
+  }
+
+  .print-title {
+    display: block;
+    margin: 0 0 16px;
+    color: #17233b;
+    font: 700 20pt Arial, sans-serif;
+  }
+
+  .timetable-toolbar,
+  .timetable-summary,
+  .calendar-panel,
+  .agenda-toolbar,
+  .agenda-section-heading button,
+  .agenda-delete,
+  .leave-card > button,
+  .schedule-note,
+  .inline-alert,
+  .timetable-print-table {
+    display: none !important;
+  }
+
+  .timetable-table-wrap {
+    overflow: visible;
+    box-shadow: none !important;
+  }
+
+  .timetable-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #182238;
+    font: 9pt Arial, sans-serif;
+  }
+
+  .timetable-table th,
+  .timetable-table td {
+    padding: 7px;
+    border: 1px solid #aeb7c5;
+    text-align: left;
+  }
+
+  .timetable-table th {
+    background: #edf0f7 !important;
+    print-color-adjust: exact;
+  }
+
+  .agenda-section-heading {
+    margin-top: 16px;
+  }
+
+  .leave-card,
+  .announcement-card {
+    break-inside: avoid;
+  }
+}
