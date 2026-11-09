@@ -10,15 +10,15 @@ The project is split into two separate applications:
 - Node.js 20.19 or newer
 - A MongoDB 6+ database (MongoDB Atlas is supported)
 
-## Host frontend and backend separately on Render
+## Deploy automatically on Render
 
-Create a Render **Web Service** from this repository for the backend. Set **Root Directory** to `backend`, **Build Command** to `npm ci`, and **Start Command** to `npm start`.
+The repository includes a Render Blueprint in `render.yaml`. To deploy, connect the GitHub repository to Render and create a Blueprint from it. Render builds the frontend and backend together, serves them from one Web Service, and automatically deploys later pushes to the connected branch. The frontend and API share an origin, so session cookies work without separate domains.
 
-Create a Render **Static Site** from this repository for the frontend. Set **Root Directory** to `frontend`, **Build Command** to `npm ci --include=dev && npm run build`, and **Publish Directory** to `dist`. The `--include=dev` option is required because Vite is used during the build.
+During Blueprint setup, provide `MONGODB_URI` in Render's private environment settings. `MONGODB_DB` defaults to `unischedule`, and Render supplies the listening port. Configure the MongoDB Atlas network access list to allow connections from the deployed service; prefer a restricted network policy over allowing access from everywhere. Do not put database or SMTP credentials in GitHub or this repository.
 
-On the frontend Static Site, set `VITE_API_BASE_URL` to `https://<your-backend-service>.onrender.com/api`. On the backend Web Service, set `NODE_ENV=production`, `MONGODB_URI`, `MONGODB_DB=unischedule`, and `WEB_ORIGINS=https://<your-frontend-site>.onrender.com`. Use exact URLs without trailing slashes. Render provides `PORT`; do not set it manually. Keep database and optional SMTP credentials in the backend's Render environment settings, not in GitHub.
+The free Render plan may spin down when idle, so the first request after inactivity can take longer. Email reminders are optional; add the SMTP settings described in [backend/README.md](./backend/README.md) to Render's private environment settings if you want them enabled.
 
-Authentication uses `SameSite=Strict` session cookies. For reliable sign-in across the two services, use frontend and backend custom domains under the same parent domain (for example, `app.example.com` and `api.example.com`). Separate `*.onrender.com` addresses may be treated as cross-site by browsers, which can block session cookies. If you cannot use a custom domain, the recommended alternative is one Render Web Service serving both frontend and backend.
+After deployment, create the initial Administrator once by running the `create-admin` script against the production database, as described in [backend/README.md](./backend/README.md). Hosting and subsequent code deployments are automatic; provisioning the first admin and supplying private provider credentials still require these one-time setup steps.
 
 ## Run the project
 
