@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: unischedule
+    runtime: node
+    plan: free
+    autoDeploy: true
+    buildCommand: npm ci --prefix backend && npm ci --prefix frontend --include=dev && npm run build --prefix frontend
+    startCommand: npm start --prefix backend
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: 20.19.0
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_DB
+        value: unischedule
+      - key: MONGODB_URI
+        sync: false

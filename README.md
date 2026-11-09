@@ -10,6 +10,16 @@ The project is split into two separate applications:
 - Node.js 20.19 or newer
 - A MongoDB 6+ database (MongoDB Atlas is supported)
 
+## Deploy automatically on Render
+
+The repository includes a Render Blueprint in `render.yaml`. To deploy, connect the GitHub repository to Render and create a Blueprint from it. Render builds the frontend and backend together, serves them from one Web Service, and automatically deploys later pushes to the connected branch. The frontend and API share an origin, so session cookies work without separate domains.
+
+During Blueprint setup, provide `MONGODB_URI` in Render's private environment settings. `MONGODB_DB` defaults to `unischedule`, and Render supplies the listening port. Configure the MongoDB Atlas network access list to allow connections from the deployed service; prefer a restricted network policy over allowing access from everywhere. Do not put database or SMTP credentials in GitHub or this repository.
+
+The free Render plan may spin down when idle, so the first request after inactivity can take longer. Email reminders are optional; add the SMTP settings described in [backend/README.md](./backend/README.md) to Render's private environment settings if you want them enabled.
+
+After deployment, create the initial Administrator once by running the `create-admin` script against the production database, as described in [backend/README.md](./backend/README.md). Hosting and subsequent code deployments are automatic; provisioning the first admin and supplying private provider credentials still require these one-time setup steps.
+
 ## Run the project
 
 ### 1. Configure and start the backend
