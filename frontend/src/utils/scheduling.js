@@ -16,6 +16,9 @@ function isSameResource(field, left, right) {
 
 export function findScheduleConflicts(lectures, candidate) {
   return lectures.filter((lecture) => {
+    const lectureId = String(lecture.id ?? lecture._id ?? '');
+    const candidateId = String(candidate.id ?? candidate._id ?? '');
+    if (lectureId && lectureId === candidateId) return false;
     if (lecture.day !== candidate.day || lecture.start >= candidate.end || lecture.end <= candidate.start) {
       return false;
     }

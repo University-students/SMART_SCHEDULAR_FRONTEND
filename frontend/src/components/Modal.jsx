@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Plus, X } from 'lucide-react';
+import { Check, Pencil, Plus, X } from 'lucide-react';
 import { days, fmt, timeInputToHour, timeInputValue } from '../data';
 
 export function Modal({ type, form, setForm, onClose, onSubmit, batches = [], initialBatch = 'ICT 22' }) {
@@ -7,6 +7,7 @@ export function Modal({ type, form, setForm, onClose, onSubmit, batches = [], in
   const batchOptions = [...new Set([
     ...batches.map(batch => batch.name),
     ...(initialBatch && initialBatch !== 'All batches' ? [initialBatch] : []),
+    ...(form.batch ? [form.batch] : []),
   ].filter(Boolean))];
   if (batchOptions.length === 0) batchOptions.push('ICT 22');
   const defaultBatch = initialBatch && initialBatch !== 'All batches'
@@ -17,6 +18,7 @@ export function Modal({ type, form, setForm, onClose, onSubmit, batches = [], in
   const startHour = timeInputToHour(startValue);
   const titles = {
     class: 'Add a lecture',
+    'edit-class': 'Update lecture',
     course: 'Add a course',
     lecturer: 'Add a lecturer',
     room: 'Add a teaching room',
@@ -35,12 +37,12 @@ export function Modal({ type, form, setForm, onClose, onSubmit, batches = [], in
     <div className="modal-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
       <form className="modal" onSubmit={onSubmit}>
         <div className="modal-top">
-          <div className="modal-icon"><Plus size={20} /></div>
+          <div className="modal-icon">{type === 'edit-class' ? <Pencil size={20} /> : <Plus size={20} />}</div>
           <button type="button" className="icon-btn" onClick={onClose}><X size={18} /></button>
         </div>
         <h2>{titles[type] || 'Add item'}</h2>
-        <p>{type === 'period' ? 'Add a vacation or study-leave date range. Existing lectures will remain on the calendar.' : type === 'announcement' ? 'This announcement will be visible to everyone who signs in.' : 'Enter the details below. Times can be set in 15-minute steps.'}</p>
-        {type === 'class' && <>
+        <p>{type === 'period' ? 'Add a vacation or study-leave date range. Existing lectures will remain on the calendar.' : type === 'announcement' ? 'This announcement will be visible to everyone who signs in.' : type === 'edit-class' ? 'Update the lecture details. Changes are checked for room, lecturer, and batch conflicts.' : 'Enter the details below. Times can be set in 15-minute steps.'}</p>
+        {(type === 'class' || type === 'edit-class') && <>
           <div className="form-row">
             <Field label="Course code" value={form.code || ''} onChange={value => set('code', value)} placeholder="e.g. ICT 2201" required />
             <Field label="Course title" value={form.title || ''} onChange={value => set('title', value)} placeholder="Lecture title" required />
@@ -146,7 +148,7 @@ export function Modal({ type, form, setForm, onClose, onSubmit, batches = [], in
         </>}
         <div className="modal-actions">
           <button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button>
-          <button type="submit" className="btn btn-primary"><Check size={16} /> Save details</button>
+          <button type="submit" className="btn btn-primary"><Check size={16} /> {type === 'edit-class' ? 'Update lecture' : 'Save details'}</button>
         </div>
       </form>
     </div>

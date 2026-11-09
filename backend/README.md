@@ -110,6 +110,7 @@ Run backend syntax checks with `npm run check` and backend tests with `npm test`
 - `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`
 - Authenticated reads: `GET /api/classes`, `/courses`, `/lecturers`, `/rooms`, `/batches`, `/availability`
 - Administrator/Head of Department writes: `POST`, `PUT /:id`, and `DELETE /:id` on resource collections
+- `DELETE /api/schedule` clears all recurring lecture records for Administrators and Heads of Department; other data is unchanged
 - `PUT /api/schedule/replace` validates conflicts and atomically replaces the timetable
 - A Lecturer can update only availability matching their provisioned account name; administrators can update any lecturer
 

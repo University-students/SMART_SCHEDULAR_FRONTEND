@@ -67,6 +67,7 @@ test('calendar periods require valid inclusive date ranges and announcements rej
 
 test('overlap detection checks shared resources and permits adjacent lectures', () => {
   const existing = { id: 'one', day: 0, start: 8, end: 10, room: 'LT 01', lecturer: 'Dr. Example', batch: 'ICT 22' };
+  assert.equal(hasScheduleConflict([existing], { ...existing, start: 9, end: 11 }), false);
   assert.equal(hasScheduleConflict([existing], { ...existing, id: 'two', start: 9, end: 11, room: 'LT 02' }), true);
   assert.equal(hasScheduleConflict([existing], { ...existing, id: 'two', start: 10, end: 12 }), false);
   assert.equal(hasScheduleConflict([existing], { ...existing, id: 'two', start: 9, end: 11, lecturer: 'Unassigned lecturer', room: 'LT 02', batch: 'ICT 23' }), false);
@@ -112,6 +113,11 @@ test('health endpoint emits security headers and API responses are not cached', 
   const apiResponse = await fetch(`http://127.0.0.1:${server.address().port}/api/classes`);
   assert.equal(apiResponse.headers.get('cache-control'), 'no-store');
   assert.equal(apiResponse.status, 401);
+  const clearScheduleResponse = await fetch(`http://127.0.0.1:${server.address().port}/api/schedule`, {
+    method: 'DELETE',
+    headers: { Origin: 'http://localhost:5173' },
+  });
+  assert.equal(clearScheduleResponse.status, 401);
 });
 
 test('production serves the built frontend and keeps API requests on API handlers', async t => {

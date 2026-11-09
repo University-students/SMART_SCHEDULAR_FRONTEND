@@ -229,7 +229,9 @@ for (const { path, model } of resources) {
       if (!mongoose.isValidObjectId(req.params.id)) {
         return res.status(400).json({ error: { code: 'INVALID_ID', message: 'The record ID is invalid.' } });
       }
-      const document = await model.findByIdAndDelete(req.params.id);
+      const document = path === 'classes'
+        ? await withScheduleWrite(session => Lecture.findOneAndDelete({ _id: req.params.id }, { session }))
+        : await model.findByIdAndDelete(req.params.id);
       if (!document) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'The record was not found.' } });
       return res.json({ data: { id: String(document._id) } });
     } catch (error) {
@@ -268,6 +270,18 @@ router.put('/schedule/replace', adminOnly, async (req, res, next) => {
     }
     const emailNotifications = await notifyStudentsOfScheduleUpdate(req, addedLectures);
     return res.json({ data: saved.map(serialize), meta: { emailNotifications } });
+  } catch (error) {
+    return next(error);
+  }
+});
+
+router.delete('/schedule', adminOnly, async (req, res, next) => {
+  try {
+    const deletedCount = await withScheduleWrite(async session => {
+      const result = await Lecture.deleteMany({}, { session });
+      return result.deletedCount;
+    });
+    return res.json({ data: { deletedCount } });
   } catch (error) {
     return next(error);
   }

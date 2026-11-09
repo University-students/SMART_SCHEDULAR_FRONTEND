@@ -64,6 +64,47 @@
   font-size: 12px;
 }
 
+.btn-danger-outline {
+  border: 1px solid #f0caca;
+  color: #b94a4a;
+  background: #fff;
+}
+
+.btn-danger-outline:hover {
+  border-color: #e7aaaa;
+  background: #fff7f7;
+}
+
+.btn-danger {
+  border: 1px solid #c84646;
+  color: #fff;
+  background: #c84646;
+}
+
+.btn-danger:hover {
+  border-color: #ad3636;
+  background: #ad3636;
+}
+
+.schedule-clear-modal {
+  width: min(460px, 100%);
+}
+
+.schedule-clear-modal > p {
+  line-height: 1.6;
+}
+
+.timetable-lecture-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 2px;
+}
+
+.agenda-edit {
+  color: #6558c8;
+}
+
 .agenda-list,
 .leave-list,
 .announcements-list,
@@ -360,6 +401,19 @@
 
   .agenda-section-heading {
     align-items: start;
+    flex-wrap: wrap;
+  }
+
+  .agenda-section-heading > .btn {
+    width: 100%;
+  }
+
+  .schedule-clear-modal .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .schedule-clear-modal .modal-actions .btn {
+    width: 100%;
   }
 }
 

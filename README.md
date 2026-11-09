@@ -68,7 +68,7 @@ Run the account-creation commands only from a trusted terminal. Keep passwords a
 ## Main app workflow
 
 1. Sign in. Students can register for student accounts; an Administrator provisions staff and management accounts.
-2. Use **Timetable** to search and filter the recurring weekly schedule by batch. Administrators and Heads of Department can add or remove lectures and manage shared vacation or study-leave periods. Leave dates are informational and do not cancel lectures.
+2. Use **Timetable** to search and filter the recurring weekly schedule by batch. Administrators and Heads of Department can add, edit (including the day and time), or remove lectures. **Clear all lectures** removes the entire weekly lecture schedule after confirmation; courses, rooms, batches, announcements, and leave periods are kept. Administrators and Heads of Department can also manage shared vacation or study-leave periods. Leave dates are informational and do not cancel lectures.
 3. Use **Courses**, **Lecturers**, **Rooms**, and **Batches** to review scheduling resources. Administrators and Heads of Department can manage them.
 4. Lecturers can update their own availability. Administrators can manage availability for any lecturer.
 5. Use **Announcements** for shared notices. Administrators and Heads of Department can post and remove announcements.

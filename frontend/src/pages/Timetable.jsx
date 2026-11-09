@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { AlertTriangle, CalendarDays, Search, Trash2 } from 'lucide-react';
+import { AlertTriangle, CalendarDays, Pencil, Search, Trash2 } from 'lucide-react';
 import { days, fmt } from '../data';
 import '../calendar.css';
 import '../print.css';
@@ -13,6 +13,8 @@ function formatDate(value) {
 export function Timetable({
   classes,
   onRemove,
+  onEdit,
+  onClearAll,
   canManage = true,
   batches = [],
   batchFilter,
@@ -24,6 +26,7 @@ export function Timetable({
   setConflicts,
 }) {
   const [search, setSearch] = useState('');
+  const [confirmClear, setConfirmClear] = useState(false);
   const visible = useMemo(() => classes
     .filter(lecture => batchFilter === 'All batches' || lecture.batch === batchFilter)
     .filter(lecture => `${lecture.title} ${lecture.code} ${lecture.lecturer} ${lecture.room}`.toLowerCase().includes(search.toLowerCase()))
@@ -64,6 +67,7 @@ export function Timetable({
     <section className="agenda-section">
       <div className="agenda-section-heading">
         <div><h2>Weekly timetable</h2><p>{visible.length} recurring {visible.length === 1 ? 'lecture' : 'lectures'} · times repeat every week</p></div>
+        {canManage && classes.length > 0 && <button className="btn btn-danger-outline" onClick={() => setConfirmClear(true)}><Trash2 size={15} />Clear all lectures</button>}
       </div>
       {!visible.length
         ? <div className="panel agenda-empty"><CalendarDays size={20} /><span>No lectures match this search and batch filter.</span></div>
@@ -88,7 +92,10 @@ export function Timetable({
                       <article className={`timetable-lecture-card ${lecture.color || 'violet'}`} key={lecture.id}>
                         <div className="timetable-lecture-heading">
                           <span className="timetable-course-code">{lecture.code}</span>
-                          {canManage && <button className="icon-btn agenda-delete" aria-label={`Remove recurring ${lecture.code} from timetable`} title="Remove this recurring lecture from the timetable" onClick={() => onRemove(lecture.id)}><Trash2 size={14} /></button>}
+                          {canManage && <div className="timetable-lecture-actions">
+                            <button className="icon-btn agenda-edit" aria-label={`Edit ${lecture.code}`} title="Edit lecture details and time" onClick={() => onEdit(lecture)}><Pencil size={14} /></button>
+                            <button className="icon-btn agenda-delete" aria-label={`Remove recurring ${lecture.code} from timetable`} title="Remove this recurring lecture from the timetable" onClick={() => onRemove(lecture.id)}><Trash2 size={14} /></button>
+                          </div>}
                         </div>
                         <strong className="timetable-lecture-title">{lecture.title}</strong>
                         <span className="timetable-lecture-time">{fmt(lecture.start)} – {fmt(lecture.end)}</span>
@@ -103,6 +110,18 @@ export function Timetable({
           </table>
         </div>}
     </section>
+
+    {confirmClear && <div className="modal-backdrop" role="presentation" onMouseDown={event => { if (event.target === event.currentTarget) setConfirmClear(false); }}>
+      <section className="modal schedule-clear-modal" role="alertdialog" aria-modal="true" aria-labelledby="clear-timetable-title" aria-describedby="clear-timetable-description">
+        <div className="modal-top"><div className="modal-icon danger"><AlertTriangle size={20} /></div><button className="icon-btn" aria-label="Close confirmation" onClick={() => setConfirmClear(false)}><span aria-hidden="true">×</span></button></div>
+        <h2 id="clear-timetable-title">Clear the whole timetable?</h2>
+        <p id="clear-timetable-description">This permanently removes all {classes.length} scheduled {classes.length === 1 ? 'lecture' : 'lectures'} across every batch. Courses, rooms, batches, announcements, and leave periods will not be deleted.</p>
+        <div className="modal-actions">
+          <button className="btn btn-secondary" onClick={() => setConfirmClear(false)}>Cancel</button>
+          <button className="btn btn-danger" onClick={async () => { if (await onClearAll()) setConfirmClear(false); }}><Trash2 size={15} />Clear all lectures</button>
+        </div>
+      </section>
+    </div>}
 
     <section className="agenda-section leave-section">
       <div className="agenda-section-heading">
