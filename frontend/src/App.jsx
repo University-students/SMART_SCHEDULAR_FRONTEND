@@ -51,10 +51,10 @@ function App() {
   const [conflicts, setConflicts] = useState([]);
   const toastTimer = useRef(null);
   const filteredCourses = useMemo(() => courseList.filter(c => `${c.code} ${c.title} ${c.lecturer}`.toLowerCase().includes(query.toLowerCase())), [courseList, query]);
-  const notify = msg => {
+  const notify = (msg, duration = 3000) => {
     window.clearTimeout(toastTimer.current);
     setToast(msg);
-    toastTimer.current = window.setTimeout(() => setToast(''), 3000);
+    toastTimer.current = window.setTimeout(() => setToast(''), duration);
   };
   useEffect(() => () => window.clearTimeout(toastTimer.current), []);
   useEffect(() => {
@@ -206,7 +206,7 @@ function App() {
           notify('Lecture updated successfully');
         } else {
           const { meta } = await addResource('classes', lecture, setClasses);
-          notify(`Lecture added successfully.${emailNotificationMessage(meta)}`);
+          notify(`Lecture successfully added.${emailNotificationMessage(meta)}`, 5000);
         }
         setShowModal(false);
         setEditingLectureId(null);
@@ -353,7 +353,7 @@ function App() {
     <footer className="footer"><span>© 2026 UniSchedule <span className="footer-sep">•</span> Smart academic planning</span><span><span className="status-dot"></span> API connected <span className="footer-sep">•</span> MongoDB</span></footer></div></main>
     {showModal&&<Modal type={modalType} form={form} setForm={setForm} batches={batches} initialBatch={batchFilter} onClose={()=>{setShowModal(false);setEditingLectureId(null);setConflicts([])}} onSubmit={saveModal}/>}
     {conflicts.length>0&&<div className="modal-backdrop"><div className="modal conflict-modal"><div className="modal-top"><div className="modal-icon danger"><AlertTriangle size={20}/></div><button className="icon-btn" onClick={()=>setConflicts([])}><X size={18}/></button></div><h2>Schedule conflict detected</h2><p>This lecture overlaps with an existing room, lecturer, or batch booking. Please choose a different time or resource.</p><div className="conflict-list">{conflicts.map((c,i)=><div key={i}><AlertTriangle size={15}/>{c}</div>)}</div><button className="btn btn-primary full-btn" onClick={()=>setConflicts([])}>Review and edit</button></div></div>}
-    {toast&&<div className="toast"><CheckCircle2 size={18}/>{toast}<button onClick={()=>setToast('')}><X size={15}/></button></div>}
+    {toast&&<div className="toast" role="status" aria-live="polite"><CheckCircle2 size={18}/>{toast}<button aria-label="Dismiss notification" onClick={()=>setToast('')}><X size={15}/></button></div>}
   </div>;
 }
 
