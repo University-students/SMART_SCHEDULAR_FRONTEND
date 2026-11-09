@@ -29,6 +29,14 @@ export function Timetable({
     .filter(lecture => `${lecture.title} ${lecture.code} ${lecture.lecturer} ${lecture.room}`.toLowerCase().includes(search.toLowerCase()))
     .sort((left, right) => left.day - right.day || left.start - right.start || left.code.localeCompare(right.code)),
   [batchFilter, classes, search]);
+  const timeSlots = [...new Set(visible.map(lecture => lecture.start))].sort((left, right) => left - right);
+  const lecturesBySlot = new Map();
+  visible.forEach(lecture => {
+    const key = `${lecture.start}-${lecture.day}`;
+    const slotLectures = lecturesBySlot.get(key) || [];
+    slotLectures.push(lecture);
+    lecturesBySlot.set(key, slotLectures);
+  });
   const visiblePeriods = [...periods].sort((left, right) => left.startDate.localeCompare(right.startDate));
 
   return <div className="timetable-printable">
@@ -59,19 +67,37 @@ export function Timetable({
       </div>
       {!visible.length
         ? <div className="panel agenda-empty"><CalendarDays size={20} /><span>No lectures match this search and batch filter.</span></div>
-        : <div className="panel timetable-table-wrap">
-          <table className="timetable-table">
-            <thead><tr><th>Day</th><th>Time</th><th>Course code</th><th>Subject</th><th>Lecturer</th><th>Room</th><th>Batch</th>{canManage && <th>Action</th>}</tr></thead>
-            <tbody>{visible.map(lecture => (
-              <tr key={lecture.id}>
-                <td><span className="timetable-day">{days[lecture.day]}</span></td>
-                <td className="timetable-time">{fmt(lecture.start)} – {fmt(lecture.end)}</td>
-                <td><span className={`timetable-course-code ${lecture.color}`}>{lecture.code}</span></td>
-                <td className="timetable-subject">{lecture.title}</td>
-                <td>{lecture.lecturer}</td>
-                <td>{lecture.room}</td>
-                <td>{lecture.batch}</td>
-                {canManage && <td><button className="icon-btn agenda-delete" aria-label={`Remove recurring ${lecture.code} from timetable`} title="Remove this recurring lecture from the timetable" onClick={() => onRemove(lecture.id)}><Trash2 size={15} /></button></td>}
+        : <div className="panel timetable-grid-wrap">
+          <table className="timetable-grid">
+            <thead><tr>
+              <th className="timetable-grid-time-heading" scope="col">Start</th>
+              {days.map((day, index) => (
+                <th scope="col" key={day}>
+                  <span>{day}</span>
+                  <small>{visible.filter(lecture => lecture.day === index).length} {visible.filter(lecture => lecture.day === index).length === 1 ? 'class' : 'classes'}</small>
+                </th>
+              ))}
+            </tr></thead>
+            <tbody>{timeSlots.map(start => (
+              <tr key={start}>
+                <th scope="row" className="timetable-grid-time">{fmt(start)}</th>
+                {days.map((day, index) => {
+                  const slotLectures = lecturesBySlot.get(`${start}-${index}`) || [];
+                  return <td key={day} className={slotLectures.length ? 'timetable-grid-cell has-lecture' : 'timetable-grid-cell'}>
+                    {slotLectures.length ? slotLectures.map(lecture => (
+                      <article className={`timetable-lecture-card ${lecture.color || 'violet'}`} key={lecture.id}>
+                        <div className="timetable-lecture-heading">
+                          <span className="timetable-course-code">{lecture.code}</span>
+                          {canManage && <button className="icon-btn agenda-delete" aria-label={`Remove recurring ${lecture.code} from timetable`} title="Remove this recurring lecture from the timetable" onClick={() => onRemove(lecture.id)}><Trash2 size={14} /></button>}
+                        </div>
+                        <strong className="timetable-lecture-title">{lecture.title}</strong>
+                        <span className="timetable-lecture-time">{fmt(lecture.start)} – {fmt(lecture.end)}</span>
+                        <span className="timetable-lecture-meta">{lecture.lecturer} · {lecture.room}</span>
+                        <span className="timetable-batch">{lecture.batch}</span>
+                      </article>
+                    )) : <span className="timetable-empty-cell" aria-hidden="true">—</span>}
+                  </td>;
+                })}
               </tr>
             ))}</tbody>
           </table>

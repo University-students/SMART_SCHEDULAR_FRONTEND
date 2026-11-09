@@ -47,28 +47,48 @@
     display: none !important;
   }
 
-  .timetable-table-wrap {
+  .timetable-grid-wrap {
     overflow: visible;
     box-shadow: none !important;
   }
 
-  .timetable-table {
+  .timetable-grid {
     width: 100%;
-    border-collapse: collapse;
+    min-width: 0;
+    border-collapse: separate;
+    border-spacing: 3px;
     color: #182238;
-    font: 9pt Arial, sans-serif;
+    font: 8pt Arial, sans-serif;
   }
 
-  .timetable-table th,
-  .timetable-table td {
-    padding: 7px;
-    border: 1px solid #aeb7c5;
+  .timetable-grid th,
+  .timetable-grid td {
+    padding: 5px;
+    border: 1px solid #c5cad4;
     text-align: left;
   }
 
-  .timetable-table th {
+  .timetable-grid thead th {
     background: #edf0f7 !important;
     print-color-adjust: exact;
+  }
+
+  .timetable-lecture-card {
+    min-height: 0;
+    padding: 5px;
+    box-shadow: none;
+    print-color-adjust: exact;
+  }
+
+  .timetable-lecture-card .agenda-delete {
+    display: none !important;
+  }
+
+  .timetable-lecture-title,
+  .timetable-lecture-time,
+  .timetable-lecture-meta,
+  .timetable-batch {
+    font-size: 7pt;
   }
 
   .agenda-section-heading {

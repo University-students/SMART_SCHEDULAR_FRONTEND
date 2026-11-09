@@ -72,71 +72,156 @@
   gap: 12px;
 }
 
-.timetable-table-wrap {
+.timetable-grid-wrap {
   overflow: auto;
-  padding: 0;
+  padding: 8px;
+  border: 1px solid #e8ecf3;
+  border-radius: 16px;
+  box-shadow: 0 12px 30px rgb(26 39 69 / 6%);
 }
 
-.timetable-table {
+.timetable-grid {
   width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-  font-size: 12px;
+  min-width: 760px;
+  border-collapse: separate;
+  border-spacing: 6px;
+  table-layout: fixed;
 }
 
-.timetable-table th,
-.timetable-table td {
-  padding: 13px 14px;
-  border-bottom: 1px solid var(--border);
+.timetable-grid th,
+.timetable-grid td {
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.timetable-grid thead th {
+  padding: 14px 12px;
+  border: 1px solid #e7e9f8;
+  border-radius: 11px;
+  color: #413d78;
+  background: linear-gradient(135deg, #f3f2ff, #f8faff);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .01em;
+}
+
+.timetable-grid thead th small {
+  display: block;
+  margin-top: 4px;
+  color: #8790a5;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.timetable-grid .timetable-grid-time-heading {
+  width: 82px;
+  color: #68728a;
+}
+
+.timetable-grid .timetable-grid-time {
+  width: 82px;
+  padding: 14px 8px;
+  color: #4b5670;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
-.timetable-table th {
-  color: var(--muted);
-  background: #f8f9fc;
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: .04em;
-  text-transform: uppercase;
+.timetable-grid-cell {
+  min-width: 120px;
+  height: 110px;
+  border: 1px solid #edf0f5;
+  border-radius: 11px;
+  background: #fbfcfe;
 }
 
-.timetable-table tbody tr:last-child td {
-  border-bottom: 0;
+.timetable-grid-cell.has-lecture {
+  border-color: #e7e9f2;
+  background: #fff;
 }
 
-.timetable-table tbody tr:hover {
-  background: #fafaff;
+.timetable-empty-cell {
+  color: #d3d8e2;
+  font-size: 12px;
 }
 
-.timetable-day {
-  color: #182238;
-  font-weight: 700;
+.timetable-lecture-card {
+  display: flex;
+  min-height: 88px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 10px;
+  border: 1px solid #e7e3ff;
+  border-left: 3px solid #7666e8;
+  border-radius: 9px;
+  background: linear-gradient(145deg, #faf9ff, #fff);
+  box-shadow: 0 3px 8px rgb(34 43 75 / 5%);
 }
 
-.timetable-time {
-  color: var(--muted);
-  font-variant-numeric: tabular-nums;
+.timetable-lecture-card.blue { border-color: #dceaff; border-left-color: #4c87df; background: linear-gradient(145deg, #f4f8ff, #fff); }
+.timetable-lecture-card.mint { border-color: #d9f0e9; border-left-color: #42a88b; background: linear-gradient(145deg, #f1fbf7, #fff); }
+.timetable-lecture-card.orange { border-color: #f5e5ce; border-left-color: #df9a43; background: linear-gradient(145deg, #fff9f0, #fff); }
+.timetable-lecture-card.pink { border-color: #f4dce8; border-left-color: #d66b9c; background: linear-gradient(145deg, #fff6fa, #fff); }
+.timetable-lecture-card.violet { border-color: #e7e3ff; border-left-color: #7666e8; background: linear-gradient(145deg, #faf9ff, #fff); }
+
+.timetable-lecture-heading {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
 }
 
 .timetable-course-code {
   display: inline-block;
-  padding: 4px 7px;
-  border-radius: 6px;
+  padding: 3px 6px;
+  border-radius: 5px;
   color: #5746bf;
-  background: #f0eeff;
-  font-weight: 700;
+  background: rgb(240 238 255 / 85%);
+  font-size: 9px;
+  font-weight: 800;
 }
 
-.timetable-course-code.blue { color: #2464bf; background: #edf4ff; }
-.timetable-course-code.mint { color: #17856e; background: #eaf8f4; }
-.timetable-course-code.orange { color: #ac6313; background: #fff5e8; }
-.timetable-course-code.pink { color: #a63b6c; background: #fff0f6; }
+.timetable-lecture-card.blue .timetable-course-code { color: #2464bf; background: #e7f0ff; }
+.timetable-lecture-card.mint .timetable-course-code { color: #17856e; background: #e4f6ef; }
+.timetable-lecture-card.orange .timetable-course-code { color: #ac6313; background: #fff0d9; }
+.timetable-lecture-card.pink .timetable-course-code { color: #a63b6c; background: #ffe8f1; }
 
-.timetable-subject {
+.timetable-lecture-title {
+  display: -webkit-box;
+  overflow: hidden;
+  color: #222d45;
+  font-size: 11px;
+  line-height: 1.4;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.timetable-lecture-time {
   color: #182238;
-  font-weight: 600;
-  white-space: normal !important;
-  min-width: 180px;
+  font-size: 10px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.timetable-lecture-meta {
+  overflow: hidden;
+  max-width: 100%;
+  color: #768197;
+  font-size: 9px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timetable-batch {
+  padding: 2px 6px;
+  border-radius: 999px;
+  color: #59647a;
+  background: #f0f2f7;
+  font-size: 9px;
+  font-weight: 700;
 }
 
 .agenda-delete {
@@ -249,6 +334,20 @@
 }
 
 @media (max-width: 760px) {
+  .timetable-grid-wrap {
+    padding: 4px;
+    border-radius: 12px;
+  }
+
+  .timetable-grid {
+    border-spacing: 4px;
+  }
+
+  .timetable-grid th,
+  .timetable-grid td {
+    padding: 8px;
+  }
+
   .agenda-filters {
     align-items: stretch;
     flex-direction: column;
